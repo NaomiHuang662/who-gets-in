@@ -1,0 +1,7 @@
+.claude/
+src/__pycache__/
+fetch.log
+serve.py
+html2pdf6-*
+data/sample_data.csv
+*.pdf

@@ -1,0 +1,100 @@
+Princeton University
+Massachusetts Institute of Technology
+Harvard University
+Stanford University
+Yale University
+University of Pennsylvania
+California Institute of Technology
+Duke University
+Brown University
+Johns Hopkins University
+Northwestern University
+Columbia University
+Cornell University
+University of Chicago
+University of California-Berkeley
+University of California-Los Angeles
+Rice University
+University of Notre Dame
+Vanderbilt University
+Carnegie Mellon University
+University of Michigan-Ann Arbor
+Georgetown University
+University of Virginia-Main Campus
+University of North Carolina at Chapel Hill
+Emory University
+University of California-San Diego
+University of Florida
+University of Southern California
+University of Texas at Austin
+New York University
+University of California-Davis
+University of California-Irvine
+Tufts University
+University of Wisconsin-Madison
+Boston College
+Georgia Institute of Technology-Main Campus
+University of Illinois Urbana-Champaign
+University of Washington-Seattle Campus
+Boston University
+Ohio State University-Main Campus
+University of California-Santa Barbara
+Wake Forest University
+Rutgers University-New Brunswick
+University of Maryland-College Park
+University of Rochester
+Lehigh University
+Pepperdine University
+Florida State University
+Purdue University-Main Campus
+Texas A & M University-College Station
+Pennsylvania State University-Main Campus
+University of Georgia
+Syracuse University
+Indiana University-Bloomington
+University of Connecticut
+Brandeis University
+Northeastern University
+Case Western Reserve University
+Tulane University of Louisiana
+College of William and Mary
+University of Pittsburgh-Pittsburgh Campus
+University of Miami
+Worcester Polytechnic Institute
+Stevens Institute of Technology
+University of California-Santa Cruz
+Yeshiva University
+American University
+Clemson University
+University of Minnesota-Twin Cities
+Michigan State University
+Baylor University
+University of Delaware
+Fordham University
+Virginia Polytechnic Institute and State University
+North Carolina State University at Raleigh
+University of Massachusetts-Amherst
+Colorado School of Mines
+University of Iowa
+University of California-Riverside
+Stony Brook University
+University at Buffalo
+Binghamton University
+The University of Alabama
+University of Tennessee-Knoxville
+University of South Carolina-Columbia
+Auburn University
+University of Oregon
+University of Colorado Boulder
+The University of Utah
+Arizona State University-Tempe
+University of Arizona
+Washington University in St Louis
+Drexel University
+Marquette University
+Loyola University Chicago
+DePaul University
+Howard University
+Texas Christian University
+Southern Methodist University
+University of Houston
