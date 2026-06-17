@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Gets In — College Admissions & Family Income</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f4f6fb;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  background: #1a1a2e;
+  color: #f5f0e8;
+  padding: 36px 48px 28px;
+}
+header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 6px; }
+header h1 em { color: #d4a853; font-style: italic; }
+header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
+
+/* ── Layout ── */
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 32px 64px; }
+
+/* ── Controls bar ── */
+.controls {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+.search-wrap input {
+  width: 100%; padding: 9px 14px 9px 36px;
+  border: 1px solid #dce1eb; border-radius: 6px;
+  font-size: 0.9rem; background: #fff;
+  outline: none;
+}
+.search-wrap input:focus { border-color: #3b6fb6; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 0.85rem; }
+.ctrl-label { font-size: 0.8rem; color: #777; white-space: nowrap; }
+.pill-btn {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid #dce1eb;
+  background: #fff; font-size: 0.8rem; cursor: pointer; color: #555;
+  transition: all 0.15s;
+}
+.pill-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+.pill-btn:hover:not(.active) { border-color: #3b6fb6; color: #3b6fb6; }
+
+/* ── Cards ── */
+.card {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 24px 28px; margin-bottom: 24px;
+}
+.card-title { font-size: 1rem; font-weight: 600; margin-bottom: 4px; color: #1a1a2e; }
+.card-desc { font-size: 0.82rem; color: #666; line-height: 1.55; margin-bottom: 18px; }
+
+/* ── Selected school banner ── */
+#selectedBanner {
+  display: none;
+  background: #1a1a2e; color: #f5f0e8;
+  border-radius: 8px; padding: 14px 20px;
+  margin-bottom: 20px;
+  align-items: center; gap: 20px; flex-wrap: wrap;
+}
+#selectedBanner.visible { display: flex; }
+.sel-name { font-weight: 600; font-size: 1rem; flex: 1; min-width: 180px; }
+.sel-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+.sel-stat { text-align: center; }
+.sel-stat .sv { font-size: 1.2rem; font-weight: 700; color: #d4a853; }
+.sel-stat .sl { font-size: 0.72rem; color: rgba(245,240,232,0.6); text-transform: uppercase; letter-spacing: 0.05em; }
+.clear-btn {
+  background: none; border: 1px solid rgba(245,240,232,0.3);
+  color: rgba(245,240,232,0.7); padding: 5px 12px; border-radius: 5px;
+  cursor: pointer; font-size: 0.8rem;
+}
+.clear-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* ── Two-col layout for charts ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 780px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── Scatter hint ── */
+.click-hint {
+  font-size: 0.78rem; color: #c84b31; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── Legend ── */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #555; }
+.leg-dot { width: 11px; height: 11px; border-radius: 50%; }
+
+/* ── Gap table ── */
+.gap-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.gap-table th { text-align: left; padding: 8px 10px; color: #888; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #eee; font-weight: 500; }
+.gap-table td { padding: 8px 10px; border-bottom: 1px solid #f3f3f3; }
+.gap-table tr:last-child td { border-bottom: none; }
+.gap-table tr:hover { background: #f8faff; cursor: pointer; }
+.gap-bar { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+.gap-num { font-weight: 600; }
+
+/* ── Note ── */
+.note { font-size: 0.75rem; color: #aaa; margin-top: 12px; line-height: 1.5; }
+
+/* ── Findings ── */
+.findings { border-left: 3px solid #d4a853; padding-left: 18px; margin-top: 14px; }
+.findings p { font-size: 0.88rem; line-height: 1.7; color: #444; margin-bottom: 10px; }
+.findings p:last-child { margin-bottom: 0; }
+.findings strong { color: #1a1a2e; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Who Gets In — <em>College Admissions &amp; Family Income</em></h1>
+  <p>Visualizing the gap between "meritocracy" and economic reality across 90+ U.S. universities. Click any dot to explore a school's financial aid breakdown.</p>
+</header>
+
+<div class="container">
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchBox" placeholder="Search for a school…">
+    </div>
+    <span class="ctrl-label">Highlight:</span>
+    <button class="pill-btn active" data-filter="all">All schools</button>
+    <button class="pill-btn" data-filter="selective">Most selective (&lt;15%)</button>
+    <button class="pill-btn" data-filter="public">Public universities</button>
+    <button class="pill-btn" data-filter="private">Private universities</button>
+  </div>
+
+  <!-- Selected school banner -->
+  <div id="selectedBanner">
+    <span class="sel-name" id="selName">—</span>
+    <div class="sel-stats">
+      <div class="sel-stat"><div class="sv" id="selAdmit">—</div><div class="sl">Admit Rate</div></div>
+      <div class="sel-stat"><div class="sv" id="selQ1">—</div><div class="sl">Bottom Quintile</div></div>
+      <div class="sel-stat"><div class="sv" id="selPell">—</div><div class="sl">Pell Grant Rate</div></div>
+      <div class="sel-stat"><div class="sv" id="selCost">—</div><div class="sl">Cost of Attendance</div></div>
+    </div>
+    <button class="clear-btn" id="clearBtn">✕ Clear</button>
+  </div>
+
+  <!-- Chart row -->
+  <div class="two-col">
+    <!-- Chart 1 -->
+    <div class="card">
+      <div class="card-title">Admission Rate vs. Low-Income Enrollment</div>
+      <div class="card-desc">Each dot is a university. X = how selective (lower = harder to get in). Y = % of students from the bottom income quintile. <strong>The pattern: the most elite schools enroll the fewest low-income students.</strong></div>
+      <div class="click-hint">👆 Click any dot to see that school's financial aid breakdown →</div>
+      <div class="legend">
+        <div class="leg"><div class="leg-dot" style="background:#c84b31"></div>&lt;10% admit</div>
+        <div class="leg"><div class="leg-dot" style="background:#d4a853"></div>10–25%</div>
+        <div class="leg"><div class="leg-dot" style="background:#4a7c59"></div>25–50%</div>
+        <div class="leg"><div class="leg-dot" style="background:#8cb4d8"></div>&gt;50%</div>
+      </div>
+      <canvas id="scatterChart"></canvas>
+      <p class="note">Source: Opportunity Insights Mobility Report Cards (~2013–2017 cohorts). Hover for details. Click to select.</p>
+    </div>
+
+    <!-- Chart 2 -->
+    <div class="card">
+      <div class="card-title" id="barTitle">What Families Actually Pay — <span style="color:#3b6fb6">select a school</span></div>
+      <div class="card-desc" id="barDesc">Click any dot on the scatter plot, or search for a school above, to see what families at each income level actually pay after grants and scholarships.</div>
+      <canvas id="barChart"></canvas>
+      <p class="note">Source: U.S. Dept. of Education College Scorecard (most recent year). Negative values = net aid exceeds costs.</p>
+    </div>
+  </div>
+
+  <!-- Gap table + Findings -->
+  <div class="two-col">
+    <!-- Gap table -->
+    <div class="card">
+      <div class="card-title">The Meritocracy Gap — Ranked</div>
+      <div class="card-desc">Schools where the gap between admission selectivity and low-income enrollment is largest. High admit rate but low low-income share = the gap is especially stark.</div>
+      <table class="gap-table" id="gapTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>School</th>
+            <th>Admit</th>
+            <th>Bottom Quintile</th>
+            <th>Gap Score</th>
+          </tr>
+        </thead>
+        <tbody id="gapBody"></tbody>
+      </table>
+      <p class="note">Gap score = (1 − admission rate) × (1 − bottom quintile share) — schools scoring highest are both selective AND enroll few low-income students. Click any row to select that school.</p>
+    </div>
+
+    <!-- Findings -->
+    <div class="card">
+      <div class="card-title">What the Data Shows</div>
+      <div class="findings">
+        <p>Across 90+ universities, <strong>admission selectivity and low-income enrollment move in opposite directions</strong>. Schools admitting fewer than 10% of applicants enroll just 2–5% of students from the bottom income quintile — while schools admitting 60–90% enroll 8–15%.</p>
+        <p>The financial aid picture is more nuanced. Many highly selective private universities charge families earning under $30k almost nothing: <strong>Princeton charges $41/year, MIT and Stanford near zero</strong>. That looks like radical generosity — but these schools admit so few low-income applicants that the policy barely moves enrollment numbers.</p>
+        <p>Meanwhile, less selective public universities like UC Riverside (76% admit rate) and UC Irvine (29%) enroll far more low-income students as a raw share of enrollment. <strong>In practice, access comes more from open admissions than from need-blind aid at elite schools.</strong></p>
+        <p>The core argument: top universities talk about meritocracy and need-blind aid, but the data shows a consistent pattern where admission selectivity predicts lower low-income enrollment — regardless of financial aid generosity.</p>
+      </div>
+      <p class="note" style="margin-top:16px;">Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DATA = [
+  {name:"Princeton University",state:"NJ",type:"private",admit:0.0462,pell:0.1924,par_q1:2.04,np:[41,352,1217,4478,36094],cost:84040},
+  {name:"MIT",state:"MA",type:"private",admit:0.0455,pell:0.1932,par_q1:5.11,np:[-2533,93,1480,11555,48479],cost:82730},
+  {name:"Harvard University",state:"MA",type:"private",admit:0.0365,pell:0.1643,par_q1:3.05,np:[8697,2991,2091,9941,53337],cost:85540},
+  {name:"Stanford University",state:"CA",type:"private",admit:0.0361,pell:0.1916,par_q1:3.58,np:[-2536,-193,3212,11092,53882],cost:87833},
+  {name:"Yale University",state:"CT",type:"private",admit:0.0387,pell:0.2039,par_q1:3.63,np:[17633,15626,17943,12558,45951],cost:88300},
+  {name:"University of Pennsylvania",state:"PA",type:"private",admit:0.054,pell:0.1653,par_q1:3.54,np:[-3012,316,10439,25476,55972],cost:89028},
+  {name:"Caltech",state:"CA",type:"private",admit:0.0257,pell:0.1799,par_q1:4.81,np:[-2133,-2886,431,18753,54157],cost:86886},
+  {name:"Duke University",state:"NC",type:"private",admit:0.0571,pell:0.1403,par_q1:3.18,np:[735,-361,5706,17100,54230],cost:87072},
+  {name:"Brown University",state:"RI",type:"private",admit:0.0539,pell:0.1384,par_q1:2.92,np:[-420,2031,5858,16219,44937],cost:87648},
+  {name:"Johns Hopkins University",state:"MD",type:"private",admit:0.0644,pell:0.1949,par_q1:3.67,np:[428,-213,4179,14591,37774],cost:85947},
+  {name:"Northwestern University",state:"IL",type:"private",admit:0.0769,pell:0.1855,par_q1:3.07,np:[1764,6099,7898,18282,48777],cost:91250},
+  {name:"Cornell University",state:"NY",type:"private",admit:0.0876,pell:0.1841,par_q1:4.90,np:[1776,4070,6796,14311,49992],cost:88140},
+  {name:"UC Berkeley",state:"CA",type:"public",admit:0.1098,pell:0.2864,par_q1:8.84,np:[5311,6501,9693,15074,34529],cost:45619},
+  {name:"UCLA",state:"CA",type:"public",admit:0.0897,pell:0.2824,par_q1:10.24,np:[5579,6682,9811,14142,29682],cost:38614},
+  {name:"Rice University",state:"TX",type:"private",admit:0.08,pell:0.1703,par_q1:3.29,np:[5827,563,3217,17755,48466],cost:79788},
+  {name:"University of Notre Dame",state:"IN",type:"private",admit:0.1127,pell:0.1374,par_q1:1.44,np:[7244,7254,11432,18670,45321],cost:83271},
+  {name:"Vanderbilt University",state:"TN",type:"private",admit:0.0586,pell:0.2022,par_q1:2.48,np:[3414,1876,4498,12153,45145],cost:89590},
+  {name:"Carnegie Mellon University",state:"PA",type:"private",admit:0.1166,pell:0.1604,par_q1:4.11,np:[9097,6994,14468,24865,51480],cost:83654},
+  {name:"University of Michigan",state:"MI",type:"public",admit:0.1564,pell:0.1813,par_q1:3.00,np:[1043,1878,4895,10869,26517],cost:34654},
+  {name:"Georgetown University",state:"DC",type:"private",admit:0.1291,pell:0.1012,par_q1:3.19,np:[5064,12155,18329,26459,57403],cost:88741},
+  {name:"University of Virginia",state:"VA",type:"public",admit:0.1681,pell:0.1555,par_q1:2.82,np:[8174,9696,13283,20822,35402],cost:39926},
+  {name:"UNC Chapel Hill",state:"NC",type:"public",admit:0.1534,pell:0.2004,par_q1:3.46,np:[2004,3918,8538,16415,24396],cost:26055},
+  {name:"Emory University",state:"GA",type:"private",admit:0.1065,pell:0.1821,par_q1:3.61,np:[7363,9220,11237,13821,53018],cost:83622},
+  {name:"UC San Diego",state:"CA",type:"public",admit:0.2671,pell:0.342,par_q1:8.78,np:[7525,8155,9942,15199,28785],cost:38701},
+  {name:"USC",state:"CA",type:"private",admit:0.0981,pell:0.2224,par_q1:7.21,np:[13516,14394,19539,24976,56116],cost:90300},
+  {name:"UT Austin",state:"TX",type:"public",admit:0.2664,pell:0.2585,par_q1:5.00,np:[12553,14297,17207,24406,30082],cost:31247},
+  {name:"UC Davis",state:"CA",type:"public",admit:0.4183,pell:0.3135,par_q1:8.58,np:[9211,9966,11951,16294,31272],cost:41238},
+  {name:"UC Irvine",state:"CA",type:"public",admit:0.2857,pell:0.361,par_q1:12.25,np:[8123,9313,11642,15164,30546],cost:38632},
+  {name:"Tufts University",state:"MA",type:"private",admit:0.1149,pell:0.1204,par_q1:3.42,np:[11284,9811,14923,23311,58570],cost:88300},
+  {name:"UW Madison",state:"WI",type:"public",admit:0.452,pell:0.1594,par_q1:3.98,np:[4200,4101,8134,17763,27292],cost:28679},
+  {name:"Boston College",state:"MA",type:"private",admit:0.1643,pell:0.1291,par_q1:2.85,np:[4284,7304,13112,19999,60308],cost:89493},
+  {name:"Georgia Tech",state:"GA",type:"public",admit:0.1407,pell:0.139,par_q1:3.23,np:[7666,7209,10818,15088,17396],cost:28167},
+  {name:"UIUC",state:"IL",type:"public",admit:0.4237,pell:0.2341,par_q1:5.08,np:[2038,5373,7982,15152,28761],cost:33642},
+  {name:"University of Washington",state:"WA",type:"public",admit:0.3915,pell:0.1486,par_q1:5.38,np:[6384,7039,8110,14328,30019],cost:32446},
+  {name:"Boston University",state:"MA",type:"private",admit:0.1111,pell:0.1915,par_q1:4.00,np:[9500,9342,11778,22517,47504],cost:86285},
+  {name:"Ohio State University",state:"OH",type:"public",admit:0.6057,pell:0.2016,par_q1:5.16,np:[4885,5751,9807,20461,27359],cost:30305},
+  {name:"UC Santa Barbara",state:"CA",type:"public",admit:0.3297,pell:0.2785,par_q1:6.21,np:[9231,9992,12588,17136,31863],cost:41573},
+  {name:"Wake Forest University",state:"NC",type:"private",admit:0.2167,pell:0.1009,par_q1:1.79,np:[6525,6331,7647,12771,58081],cost:87499},
+  {name:"Rutgers University",state:"NJ",type:"public",admit:0.5815,pell:0.279,par_q1:37.86,np:[16343,16210,18282,25106,35016],cost:36993},
+  {name:"University of Maryland",state:"MD",type:"public",admit:0.4479,pell:0.1939,par_q1:18.13,np:[2962,6051,10273,18250,26691],cost:29299},
+  {name:"University of Rochester",state:"NY",type:"private",admit:0.4008,pell:0.1725,par_q1:5.74,np:[9678,12185,21087,27883,46801],cost:85962},
+  {name:"Lehigh University",state:"PA",type:"private",admit:0.2593,pell:0.1771,par_q1:3.29,np:[16917,17140,18722,22184,48751],cost:80856},
+  {name:"Pepperdine University",state:"CA",type:"private",admit:0.6286,pell:0.2025,par_q1:4.32,np:[50560,42674,51063,61851,65081],cost:93512},
+  {name:"Florida State University",state:"FL",type:"public",admit:0.2422,pell:0.2297,par_q1:6.33,np:[5938,6963,10496,14991,19239],cost:25720},
+  {name:"Purdue University",state:"IN",type:"public",admit:0.4987,pell:0.1298,par_q1:3.18,np:[5098,6241,9438,18177,22742],cost:24591},
+  {name:"Texas A&M",state:"TX",type:"public",admit:0.5743,pell:0.1964,par_q1:12.24,np:[12784,13317,17435,26520,30660],cost:32696},
+  {name:"Penn State",state:"PA",type:"public",admit:0.6056,pell:0.1388,par_q1:5.83,np:[19845,20049,25667,31834,37831],cost:39694},
+  {name:"Syracuse University",state:"NY",type:"private",admit:0.4592,pell:0.1707,par_q1:5.69,np:[15817,15845,21132,28780,55401],cost:84517},
+  {name:"Indiana University",state:"IN",type:"public",admit:0.7821,pell:0.1676,par_q1:5.29,np:[6324,7610,12154,20204,25128],cost:28801},
+  {name:"University of Connecticut",state:"CT",type:"public",admit:0.5239,pell:0.2538,par_q1:3.66,np:[15193,16339,20608,28285,33797],cost:39426},
+  {name:"Brandeis University",state:"MA",type:"private",admit:0.405,pell:0.1497,par_q1:4.00,np:[13363,15135,20536,26784,54885],cost:86448},
+  {name:"Northeastern University",state:"MA",type:"private",admit:0.0522,pell:0.1234,par_q1:5.15,np:[2264,2436,5301,16241,47696],cost:84641},
+  {name:"Case Western Reserve",state:"OH",type:"private",admit:0.3654,pell:0.1752,par_q1:3.27,np:[19025,18506,20849,26159,53061],cost:85851},
+  {name:"Tulane University",state:"LA",type:"private",admit:0.1398,pell:0.0976,par_q1:16.70,np:[16126,18041,20149,28207,56667],cost:87004},
+  {name:"University of Pittsburgh",state:"PA",type:"public",admit:0.5808,pell:0.1398,par_q1:5.69,np:[14709,18371,23192,31567,36008],cost:38105},
+  {name:"University of Miami",state:"FL",type:"private",admit:0.189,pell:0.1486,par_q1:7.47,np:[15978,17941,21768,27982,50352],cost:86078},
+  {name:"WPI",state:"MA",type:"private",admit:0.6016,pell:0.1188,par_q1:3.22,np:[24018,24452,32350,37753,49716],cost:78679},
+  {name:"Stevens Institute of Technology",state:"NJ",type:"private",admit:0.4758,pell:0.2043,par_q1:6.87,np:[27221,27603,33102,38095,49538],cost:79790},
+  {name:"UC Santa Cruz",state:"CA",type:"public",admit:0.6579,pell:0.3157,par_q1:7.37,np:[8717,10613,14418,18986,33323],cost:41179},
+  {name:"Yeshiva University",state:"NY",type:"private",admit:0.5562,pell:0.1344,par_q1:3.16,np:[24103,25462,28207,41944,69618],cost:70892},
+  {name:"American University",state:"DC",type:"private",admit:0.6196,pell:0.1388,par_q1:3.53,np:[23233,20444,26035,30063,53673],cost:76058},
+  {name:"Clemson University",state:"SC",type:"public",admit:0.3834,pell:0.1475,par_q1:3.17,np:[13607,14109,18851,24833,27922],cost:35015},
+  {name:"University of Minnesota",state:"MN",type:"public",admit:0.7975,pell:0.1765,par_q1:3.83,np:[6642,7283,9931,16415,27008],cost:30061},
+  {name:"Michigan State",state:"MI",type:"public",admit:0.848,pell:0.2009,par_q1:4.09,np:[7068,10830,16521,22703,28546],cost:32198},
+  {name:"Baylor University",state:"TX",type:"private",admit:0.5128,pell:0.1245,par_q1:4.02,np:[22024,21530,33902,38852,47895],cost:74226},
+  {name:"University of Delaware",state:"DE",type:"public",admit:0.706,pell:0.1612,par_q1:2.23,np:[10901,10099,13225,17401,25580],cost:30952},
+  {name:"Fordham University",state:"NY",type:"private",admit:0.5931,pell:0.2142,par_q1:7.64,np:[32474,31657,37313,42030,52228],cost:82762},
+  {name:"Virginia Tech",state:"VA",type:"public",admit:0.5478,pell:0.1529,par_q1:2.84,np:[11689,11670,17894,25835,34201],cost:36951},
+  {name:"NC State",state:"NC",type:"public",admit:0.4174,pell:0.1958,par_q1:4.26,np:[6382,8758,13334,20087,24652],cost:26425},
+  {name:"UMass Amherst",state:"MA",type:"public",admit:0.5973,pell:0.1994,par_q1:5.77,np:[10164,10456,12932,18964,30793],cost:34549},
+  {name:"Colorado School of Mines",state:"CO",type:"public",admit:0.6069,pell:0.1357,par_q1:3.89,np:[16849,18162,22192,28183,35112],cost:40560},
+  {name:"University of Iowa",state:"IA",type:"public",admit:0.8362,pell:0.1835,par_q1:3.14,np:[15316,15489,19930,23811,26266],cost:28596},
+  {name:"UC Riverside",state:"CA",type:"public",admit:0.7639,pell:0.4695,par_q1:14.67,np:[8852,9840,13111,16571,30393],cost:38942},
+  {name:"Stony Brook University",state:"NY",type:"public",admit:0.4904,pell:0.3944,par_q1:8.26,np:[12943,15432,20728,23424,27716],cost:30539},
+  {name:"University at Buffalo",state:"NY",type:"public",admit:0.7418,pell:0.3313,par_q1:6.10,np:[14668,16585,21262,24117,28079],cost:30785},
+  {name:"Binghamton University",state:"NY",type:"public",admit:0.3861,pell:0.2812,par_q1:9.43,np:[12171,15281,20347,23533,28475],cost:30345},
+  {name:"University of Alabama",state:"AL",type:"public",admit:0.7665,pell:0.184,par_q1:6.50,np:[19169,19884,22258,25658,26729],cost:33382},
+  {name:"University of Tennessee",state:"TN",type:"public",admit:0.416,pell:0.1889,par_q1:5.02,np:[10029,12162,18206,23627,25688],cost:33678},
+  {name:"University of South Carolina",state:"SC",type:"public",admit:0.6015,pell:0.1911,par_q1:9.37,np:[12634,14953,19859,24478,28125],cost:31638},
+  {name:"Auburn University",state:"AL",type:"public",admit:0.4592,pell:0.1253,par_q1:3.33,np:[16681,17627,20558,25808,29547],cost:34919},
+  {name:"CU Boulder",state:"CO",type:"public",admit:0.7808,pell:0.1449,par_q1:3.70,np:[14231,14381,18828,26915,34818],cost:37684},
+  {name:"Arizona State",state:"AZ",type:"public",admit:0.8989,pell:0.2899,par_q1:12.12,np:[9070,10711,16801,20130,24296],cost:30111},
+  {name:"University of Arizona",state:"AZ",type:"public",admit:0.8614,pell:0.257,par_q1:8.43,np:[13353,14984,16051,19777,22307],cost:29423},
+  {name:"WashU St. Louis",state:"MO",type:"private",admit:0.1206,pell:0.1775,par_q1:1.94,np:[1716,1928,5578,12603,42170],cost:88488},
+  {name:"Drexel University",state:"PA",type:"private",admit:0.7944,pell:0.2676,par_q1:4.08,np:[28055,29435,34970,37842,48089],cost:76835},
+  {name:"Marquette University",state:"WI",type:"private",admit:0.8134,pell:0.1839,par_q1:2.75,np:[22269,18916,27378,32374,36813],cost:66768},
+  {name:"Loyola University Chicago",state:"IL",type:"private",admit:0.816,pell:0.2375,par_q1:8.19,np:[28992,28663,32432,36853,42346],cost:67408},
+  {name:"DePaul University",state:"IL",type:"private",admit:0.7589,pell:0.3178,par_q1:6.64,np:[27359,25950,28687,31057,37092],cost:63052},
+  {name:"Howard University",state:"DC",type:"private",admit:0.4134,pell:0.4,par_q1:10.79,np:[46051,47477,50245,52981,54270],cost:54630},
+  {name:"Texas Christian University",state:"TX",type:"private",admit:0.4449,pell:0.1432,par_q1:2.71,np:[17956,16980,17940,34990,53450],cost:76604},
+  {name:"Southern Methodist University",state:"TX",type:"private",admit:0.6335,pell:0.1276,par_q1:4.45,np:[23544,20038,24152,33477,58213],cost:85606},
+];
+
+const FMT = v => v < 0 ? `Aid > cost` : `$${Math.round(v).toLocaleString()}`;
+const PCT = v => (v * 100).toFixed(1) + '%';
+const BRACKETS = ['$0–30k','$30–48k','$48–75k','$75–110k','$110k+'];
+const BAR_COLORS = ['#1a3a6b','#3b6fb6','#6597cc','#8cb4d8','#c4d9ef'];
+
+function dotColor(admit) {
+  if (admit < 0.10) return 'rgba(200,75,49,0.85)';
+  if (admit < 0.25) return 'rgba(212,168,83,0.85)';
+  if (admit < 0.50) return 'rgba(74,124,89,0.85)';
+  return 'rgba(140,180,216,0.85)';
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedIdx = null;
+let filterMode = 'all';
+let searchQuery = '';
+
+function visibleData() {
+  return DATA.filter(r => {
+    if (filterMode === 'selective' && r.admit >= 0.15) return false;
+    if (filterMode === 'public' && r.type !== 'public') return false;
+    if (filterMode === 'private' && r.type !== 'private') return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!r.name.toLowerCase().includes(q) && !r.state.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ── Scatter ────────────────────────────────────────────────────────────────
+const scatterCtx = document.getElementById('scatterChart');
+let scatterChart = new Chart(scatterCtx, {
+  type: 'scatter',
+  data: { datasets: [] },
+  options: {
+    responsive: true,
+    onClick(evt, elements) {
+      if (!elements.length) return;
+      const pt = scatterChart.data.datasets[0].data[elements[0].index];
+      selectSchool(pt._idx);
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const r = ctx.raw._r;
+            return [`${r.name} (${r.state})`, `Admit: ${PCT(r.admit)}  |  Bottom quintile: ${r.par_q1.toFixed(1)}%  |  Pell: ${PCT(r.pell)}`];
+          }
+        }
+      }
+    },
+    scales: {
+      x: { title: { display: true, text: 'Admission rate (%)' }, min: 0 },
+      y: { title: { display: true, text: '% students from bottom income quintile' }, min: 0 }
+    }
+  }
+});
+
+function buildScatter() {
+  const vis = visibleData();
+  const points = vis.map((r, i) => ({
+    x: +(r.admit * 100).toFixed(2),
+    y: +r.par_q1.toFixed(2),
+    _r: r,
+    _idx: DATA.indexOf(r),
+  }));
+
+  scatterChart.data.datasets = [{
+    data: points,
+    backgroundColor: points.map((p, i) =>
+      selectedIdx !== null && DATA.indexOf(vis[i]) === selectedIdx
+        ? '#ff5533'
+        : dotColor(p._r.admit)
+    ),
+    pointRadius: points.map((p, i) =>
+      selectedIdx !== null && DATA.indexOf(vis[i]) === selectedIdx ? 10 : 6
+    ),
+    pointHoverRadius: 9,
+  }];
+  scatterChart.update('none');
+}
+
+// ── Bar chart ──────────────────────────────────────────────────────────────
+const barCtx = document.getElementById('barChart');
+let barChart = new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: BRACKETS,
+    datasets: [{
+      data: [0,0,0,0,0],
+      backgroundColor: BAR_COLORS,
+      borderRadius: 5,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: { label: ctx => FMT(ctx.raw) }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Avg. net price per year' },
+        ticks: { callback: v => '$' + v.toLocaleString() }
+      },
+      x: { title: { display: true, text: 'Family income bracket' } }
+    }
+  }
+});
+
+function updateBar(r) {
+  const vals = r.np.map(v => Math.max(0, v));
+  barChart.data.datasets[0].data = vals;
+  barChart.data.datasets[0].backgroundColor = BAR_COLORS;
+  barChart.update();
+  document.getElementById('barTitle').innerHTML = `What Families Pay — <span style="color:#3b6fb6">${r.name}</span> <span style="font-size:0.8rem;font-weight:400;color:#888;">(Pell rate: ${PCT(r.pell)})</span>`;
+  document.getElementById('barDesc').textContent = `Average net price (tuition + room & board minus all grants) for families at each income level. Cost of attendance: $${r.cost.toLocaleString()}/yr.`;
+}
+
+// ── Selected banner ────────────────────────────────────────────────────────
+function selectSchool(idx) {
+  selectedIdx = idx;
+  const r = DATA[idx];
+
+  document.getElementById('selectedBanner').classList.add('visible');
+  document.getElementById('selName').textContent = r.name + (r.state ? ` (${r.state})` : '');
+  document.getElementById('selAdmit').textContent = PCT(r.admit);
+  document.getElementById('selQ1').textContent = r.par_q1.toFixed(1) + '%';
+  document.getElementById('selPell').textContent = PCT(r.pell);
+  document.getElementById('selCost').textContent = '$' + r.cost.toLocaleString();
+
+  updateBar(r);
+  buildScatter();
+
+  // Scroll to bar chart on mobile
+  if (window.innerWidth < 780) {
+    document.getElementById('barChart').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function clearSelection() {
+  selectedIdx = null;
+  document.getElementById('selectedBanner').classList.remove('visible');
+  document.getElementById('barTitle').innerHTML = `What Families Actually Pay — <span style="color:#3b6fb6">select a school</span>`;
+  document.getElementById('barDesc').textContent = 'Click any dot on the scatter plot, or search for a school above, to see what families at each income level actually pay after grants and scholarships.';
+  barChart.data.datasets[0].data = [0,0,0,0,0];
+  barChart.update();
+  buildScatter();
+}
+
+document.getElementById('clearBtn').addEventListener('click', clearSelection);
+
+// ── Gap table ──────────────────────────────────────────────────────────────
+function buildGapTable() {
+  const scored = DATA
+    .filter(r => r.par_q1 != null)
+    .map(r => ({ ...r, gap: (1 - r.admit) * (1 - r.par_q1 / 100) }))
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 15);
+
+  const tbody = document.getElementById('gapBody');
+  tbody.innerHTML = '';
+  scored.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    const barW = Math.round(r.gap * 120);
+    tr.innerHTML = `
+      <td style="color:#aaa">${i+1}</td>
+      <td><strong>${r.name}</strong></td>
+      <td>${PCT(r.admit)}</td>
+      <td>${r.par_q1.toFixed(1)}%</td>
+      <td>
+        <span class="gap-bar" style="width:${barW}px;background:#1a3a6b"></span>
+        <span class="gap-num">${r.gap.toFixed(3)}</span>
+      </td>`;
+    tr.addEventListener('click', () => selectSchool(DATA.indexOf(DATA.find(d => d.name === r.name))));
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Filter buttons ─────────────────────────────────────────────────────────
+document.querySelectorAll('.pill-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pill-btn[data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterMode = btn.dataset.filter;
+    buildScatter();
+  });
+});
+
+// ── Search ─────────────────────────────────────────────────────────────────
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  buildScatter();
+
+  // Auto-select if exactly one match
+  if (searchQuery.length > 2) {
+    const matches = DATA.filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (matches.length === 1) selectSchool(DATA.indexOf(matches[0]));
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+buildScatter();
+buildGapTable();
+</script>
+</body>
+</html>
