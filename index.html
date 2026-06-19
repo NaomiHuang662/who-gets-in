@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Who Gets In — College Admissions & Family Income</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -107,6 +109,42 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
 /* ── Note ── */
 .note { font-size: 0.75rem; color: #aaa; margin-top: 12px; line-height: 1.5; }
 
+/* ── Zoom controls ── */
+.zoom-controls {
+  display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+}
+.zoom-btn {
+  padding: 4px 12px; border-radius: 5px; border: 1px solid #dce1eb;
+  background: #fff; cursor: pointer; font-size: 0.82rem; color: #555;
+  transition: all 0.15s;
+}
+.zoom-btn:hover { background: #f0f4ff; border-color: #3b6fb6; color: #3b6fb6; }
+.zoom-hint { font-size: 0.75rem; color: #aaa; }
+
+/* ── Full school table ── */
+.school-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.school-table th {
+  text-align: left; padding: 8px 10px; color: #888; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 2px solid #eee; font-weight: 500; cursor: pointer;
+  white-space: nowrap; user-select: none;
+}
+.school-table th:hover { color: #3b6fb6; }
+.school-table th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+.school-table th.sorted .sort-arrow { opacity: 1; color: #3b6fb6; }
+.school-table td { padding: 7px 10px; border-bottom: 1px solid #f3f3f3; }
+.school-table tr:last-child td { border-bottom: none; }
+.school-table tr:hover { background: #f8faff; cursor: pointer; }
+.type-badge {
+  font-size: 0.68rem; padding: 2px 6px; border-radius: 10px;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.type-pub { background: #e8f4e8; color: #2d6a2d; }
+.type-priv { background: #fdf0e0; color: #8a5a00; }
+.table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+.table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-wrap::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
 /* ── Findings ── */
 .findings { border-left: 3px solid #d4a853; padding-left: 18px; margin-top: 14px; }
 .findings p { font-size: 0.88rem; line-height: 1.7; color: #444; margin-bottom: 10px; }
@@ -155,6 +193,12 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
       <div class="card-title">Admission Rate vs. Low-Income Enrollment</div>
       <div class="card-desc">Each dot is a university. X = how selective (lower = harder to get in). Y = % of students from the bottom income quintile. <strong>The pattern: the most elite schools enroll the fewest low-income students.</strong></div>
       <div class="click-hint">👆 Click any dot to see that school's financial aid breakdown →</div>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn">＋ Zoom in</button>
+        <button class="zoom-btn" id="zoomOut">－ Zoom out</button>
+        <button class="zoom-btn" id="zoomReset">Reset</button>
+        <span class="zoom-hint">Scroll or pinch to zoom · Drag to pan</span>
+      </div>
       <div class="legend">
         <div class="leg"><div class="leg-dot" style="background:#c84b31"></div>&lt;10% admit</div>
         <div class="leg"><div class="leg-dot" style="background:#d4a853"></div>10–25%</div>
@@ -205,6 +249,28 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
         <p>The core argument: top universities talk about meritocracy and need-blind aid, but the data shows a consistent pattern where admission selectivity predicts lower low-income enrollment — regardless of financial aid generosity.</p>
       </div>
       <p class="note" style="margin-top:16px;">Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.</p>
+    </div>
+  </div>
+
+  <!-- Full school table -->
+  <div class="card">
+    <div class="card-title">All Schools — Browse &amp; Click to Select</div>
+    <div class="card-desc">Click any row to load that school's financial aid chart. Click column headers to sort.</div>
+    <div class="table-wrap">
+      <table class="school-table" id="schoolTable">
+        <thead>
+          <tr>
+            <th data-col="name">School <span class="sort-arrow">↕</span></th>
+            <th data-col="type">Type <span class="sort-arrow">↕</span></th>
+            <th data-col="admit">Admit Rate <span class="sort-arrow">↕</span></th>
+            <th data-col="par_q1">Bottom Quintile % <span class="sort-arrow">↕</span></th>
+            <th data-col="pell">Pell Grant Rate <span class="sort-arrow">↕</span></th>
+            <th data-col="cost">Cost of Attendance <span class="sort-arrow">↕</span></th>
+            <th data-col="np0">Net Price &lt;$30k <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="schoolTableBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -356,6 +422,17 @@ let scatterChart = new Chart(scatterCtx, {
             return [`${r.name} (${r.state})`, `Admit: ${PCT(r.admit)}  |  Bottom quintile: ${r.par_q1.toFixed(1)}%  |  Pell: ${PCT(r.pell)}`];
           }
         }
+      },
+      zoom: {
+        zoom: {
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          mode: 'xy',
+        },
+        pan: {
+          enabled: true,
+          mode: 'xy',
+        },
       }
     },
     scales: {
@@ -364,6 +441,10 @@ let scatterChart = new Chart(scatterCtx, {
     }
   }
 });
+
+document.getElementById('zoomIn').addEventListener('click', () => scatterChart.zoom(1.3));
+document.getElementById('zoomOut').addEventListener('click', () => scatterChart.zoom(0.7));
+document.getElementById('zoomReset').addEventListener('click', () => scatterChart.resetZoom());
 
 function buildScatter() {
   const vis = visibleData();
@@ -511,9 +592,56 @@ document.getElementById('searchBox').addEventListener('input', e => {
   }
 });
 
+// ── School table ───────────────────────────────────────────────────────────
+let tableSortCol = 'admit';
+let tableSortAsc = true;
+
+function buildSchoolTable() {
+  const sorted = [...DATA].sort((a, b) => {
+    let av = tableSortCol === 'name' ? a.name : tableSortCol === 'type' ? a.type : tableSortCol === 'np0' ? a.np[0] : a[tableSortCol];
+    let bv = tableSortCol === 'name' ? b.name : tableSortCol === 'type' ? b.type : tableSortCol === 'np0' ? b.np[0] : b[tableSortCol];
+    if (typeof av === 'string') return tableSortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    return tableSortAsc ? av - bv : bv - av;
+  });
+
+  const tbody = document.getElementById('schoolTableBody');
+  tbody.innerHTML = '';
+  sorted.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${r.name}</strong></td>
+      <td><span class="type-badge ${r.type === 'public' ? 'type-pub' : 'type-priv'}">${r.type}</span></td>
+      <td>${PCT(r.admit)}</td>
+      <td>${r.par_q1.toFixed(1)}%</td>
+      <td>${PCT(r.pell)}</td>
+      <td>$${r.cost.toLocaleString()}</td>
+      <td>${FMT(r.np[0])}</td>`;
+    tr.addEventListener('click', () => selectSchool(DATA.indexOf(r)));
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('.school-table th').forEach(th => {
+    th.classList.remove('sorted');
+    if (th.dataset.col === tableSortCol) th.classList.add('sorted');
+  });
+}
+
+document.querySelectorAll('.school-table th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    if (tableSortCol === th.dataset.col) {
+      tableSortAsc = !tableSortAsc;
+    } else {
+      tableSortCol = th.dataset.col;
+      tableSortAsc = true;
+    }
+    buildSchoolTable();
+  });
+});
+
 // ── Init ───────────────────────────────────────────────────────────────────
 buildScatter();
 buildGapTable();
+buildSchoolTable();
 </script>
 </body>
 </html>
