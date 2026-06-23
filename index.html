@@ -443,25 +443,48 @@ let scatterChart = new Chart(scatterCtx, {
   }
 });
 
+let chartMode = 'zoom';
+
 function setChartMode(mode) {
+  chartMode = mode;
   const opts = scatterChart.options.plugins.zoom;
+  opts.zoom.drag.enabled = (mode === 'zoom');
+  scatterChart.update('none');
   if (mode === 'zoom') {
-    opts.zoom.drag.enabled = true;
-    opts.pan.enabled = false;
     document.getElementById('modeZoom').classList.add('active-mode');
     document.getElementById('modePan').classList.remove('active-mode');
     document.getElementById('zoomHint').textContent = 'Drag to draw a zoom box';
     scatterCtx.style.cursor = 'crosshair';
   } else {
-    opts.zoom.drag.enabled = false;
-    opts.pan.enabled = true;
     document.getElementById('modePan').classList.add('active-mode');
     document.getElementById('modeZoom').classList.remove('active-mode');
-    document.getElementById('zoomHint').textContent = 'Drag to pan around';
+    document.getElementById('zoomHint').textContent = 'Drag to pan · click a dot to select';
     scatterCtx.style.cursor = 'grab';
   }
-  scatterChart.update('none');
 }
+
+// Custom pan via mouse events (more reliable than the plugin's built-in pan)
+let isPanning = false, panStartX = 0, panStartY = 0;
+scatterCtx.addEventListener('mousedown', e => {
+  if (chartMode !== 'pan') return;
+  isPanning = true;
+  panStartX = e.clientX;
+  panStartY = e.clientY;
+  scatterCtx.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (!isPanning) return;
+  const dx = e.clientX - panStartX;
+  const dy = e.clientY - panStartY;
+  panStartX = e.clientX;
+  panStartY = e.clientY;
+  scatterChart.pan({ x: dx, y: dy }, undefined, 'default');
+});
+window.addEventListener('mouseup', () => {
+  if (!isPanning) return;
+  isPanning = false;
+  if (chartMode === 'pan') scatterCtx.style.cursor = 'grab';
+});
 
 document.getElementById('modeZoom').addEventListener('click', () => setChartMode('zoom'));
 document.getElementById('modePan').addEventListener('click', () => setChartMode('pan'));
