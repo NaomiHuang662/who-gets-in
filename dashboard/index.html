@@ -376,8 +376,16 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
     </div>
 
     <div id="calcResults">
-      <div class="result-grid" id="resultGrid"></div>
+      <!-- Phase 1: Raw sticker -->
+      <div class="aid-section-title" id="phase1Title"></div>
+      <div class="result-grid" id="stickerGrid"></div>
+
+      <!-- Phase 2: After school aid -->
+      <div class="aid-section-title" id="phase2Title"></div>
+      <div class="result-grid" id="aidResultGrid"></div>
       <div class="gap-verdict" id="gapVerdict"></div>
+
+      <!-- Phase 3: Resources -->
       <div class="aid-section-title" id="aidTitle"></div>
       <div class="aid-grid" id="aidGrid"></div>
     </div>
@@ -500,6 +508,43 @@ const DATA = [
   {name:"Howard University",state:"DC",type:"private",admit:0.4134,pell:0.4,par_q1:10.79,np:[46051,47477,50245,52981,54270],cost:54630},
   {name:"Texas Christian University",state:"TX",type:"private",admit:0.4449,pell:0.1432,par_q1:2.71,np:[17956,16980,17940,34990,53450],cost:76604},
   {name:"Southern Methodist University",state:"TX",type:"private",admit:0.6335,pell:0.1276,par_q1:4.45,np:[23544,20038,24152,33477,58213],cost:85606},
+  // Additional schools
+  {name:"Dartmouth College",state:"NH",type:"private",admit:0.062,pell:0.132,par_q1:2.00,np:[1500,2800,6200,16000,83000],cost:87552},
+  {name:"New York University",state:"NY",type:"private",admit:0.121,pell:0.24,par_q1:7.80,np:[18000,21000,27000,38000,68000],cost:92000},
+  {name:"Columbia University",state:"NY",type:"private",admit:0.039,pell:0.18,par_q1:3.60,np:[4500,6000,11000,22000,73000],cost:90000},
+  {name:"University of Chicago",state:"IL",type:"private",admit:0.054,pell:0.13,par_q1:1.90,np:[4000,6500,12000,24000,87000],cost:89000},
+  {name:"Williams College",state:"MA",type:"private",admit:0.089,pell:0.15,par_q1:3.00,np:[1200,2500,5500,14000,75000],cost:82000},
+  {name:"Amherst College",state:"MA",type:"private",admit:0.071,pell:0.17,par_q1:3.30,np:[500,1500,4500,13000,73000],cost:84000},
+  {name:"Swarthmore College",state:"PA",type:"private",admit:0.075,pell:0.15,par_q1:3.80,np:[600,2000,5000,14000,72000],cost:83000},
+  {name:"Wellesley College",state:"MA",type:"private",admit:0.165,pell:0.18,par_q1:3.50,np:[2000,4000,8000,16000,65000],cost:80000},
+  {name:"Pomona College",state:"CA",type:"private",admit:0.071,pell:0.20,par_q1:4.50,np:[1000,2000,5000,14000,71000],cost:82000},
+  {name:"Harvey Mudd College",state:"CA",type:"private",admit:0.107,pell:0.17,par_q1:4.20,np:[5000,7000,12000,22000,78000],cost:85000},
+  {name:"Bowdoin College",state:"ME",type:"private",admit:0.087,pell:0.14,par_q1:2.80,np:[2000,3500,7000,15000,70000],cost:80000},
+  {name:"Middlebury College",state:"VT",type:"private",admit:0.149,pell:0.12,par_q1:2.60,np:[5000,7000,12000,20000,72000],cost:82000},
+  {name:"University of Georgia",state:"GA",type:"public",admit:0.40,pell:0.22,par_q1:5.00,np:[8000,11000,14000,18000,25000],cost:26000},
+  {name:"William & Mary",state:"VA",type:"public",admit:0.34,pell:0.12,par_q1:2.80,np:[9000,11000,14000,19000,28000],cost:32000},
+  {name:"George Washington University",state:"DC",type:"private",admit:0.46,pell:0.14,par_q1:3.80,np:[28000,30000,35000,42000,67000],cost:80000},
+  {name:"Spelman College",state:"GA",type:"private",admit:0.38,pell:0.60,par_q1:15.00,np:[22000,25000,28000,35000,42000],cost:47000},
+  {name:"Rensselaer Polytechnic Institute",state:"NY",type:"private",admit:0.59,pell:0.15,par_q1:3.50,np:[26000,27000,31000,37000,58000],cost:82000},
+  {name:"University of Vermont",state:"VT",type:"public",admit:0.68,pell:0.17,par_q1:3.00,np:[18000,19000,22000,28000,38000],cost:35000},
+  {name:"Santa Clara University",state:"CA",type:"private",admit:0.56,pell:0.16,par_q1:6.50,np:[24000,27000,32000,39000,61000],cost:79000},
+  {name:"Gonzaga University",state:"WA",type:"private",admit:0.72,pell:0.14,par_q1:3.20,np:[21000,23000,28000,34000,52000],cost:67000},
+  {name:"University of San Diego",state:"CA",type:"private",admit:0.55,pell:0.17,par_q1:5.10,np:[22000,25000,30000,38000,60000],cost:73000},
+  {name:"University of Denver",state:"CO",type:"private",admit:0.77,pell:0.13,par_q1:3.60,np:[24000,26000,31000,38000,58000],cost:70000},
+  {name:"Florida International University",state:"FL",type:"public",admit:0.58,pell:0.47,par_q1:14.50,np:[6000,7500,11000,15000,22000],cost:22000},
+  {name:"University of Central Florida",state:"FL",type:"public",admit:0.41,pell:0.30,par_q1:8.20,np:[5500,7000,10000,14000,21000],cost:22000},
+  {name:"University of South Florida",state:"FL",type:"public",admit:0.44,pell:0.33,par_q1:9.40,np:[6000,7500,11000,15000,22000],cost:23000},
+  {name:"Louisiana State University",state:"LA",type:"public",admit:0.75,pell:0.26,par_q1:6.80,np:[11000,13000,16000,20000,25000],cost:28000},
+  {name:"University of Mississippi",state:"MS",type:"public",admit:0.96,pell:0.32,par_q1:7.10,np:[14000,15000,17000,20000,24000],cost:26000},
+  {name:"University of Kansas",state:"KS",type:"public",admit:0.87,pell:0.23,par_q1:4.90,np:[12000,13000,16000,20000,24000],cost:26000},
+  {name:"University of Missouri",state:"MO",type:"public",admit:0.78,pell:0.22,par_q1:4.70,np:[12000,13000,16000,21000,26000],cost:27000},
+  {name:"University of Nebraska",state:"NE",type:"public",admit:0.79,pell:0.19,par_q1:4.20,np:[11000,12000,15000,19000,24000],cost:25000},
+  {name:"Iowa State University",state:"IA",type:"public",admit:0.87,pell:0.21,par_q1:4.80,np:[10000,11000,14000,19000,23000],cost:24000},
+  {name:"University of Oklahoma",state:"OK",type:"public",admit:0.74,pell:0.22,par_q1:5.30,np:[10000,12000,15000,19000,23000],cost:24000},
+  {name:"University of Arkansas",state:"AR",type:"public",admit:0.72,pell:0.28,par_q1:6.50,np:[10000,12000,15000,18000,22000],cost:23000},
+  {name:"Texas Tech University",state:"TX",type:"public",admit:0.70,pell:0.27,par_q1:6.90,np:[10000,12000,15000,19000,23000],cost:24000},
+  {name:"University of Houston",state:"TX",type:"public",admit:0.65,pell:0.36,par_q1:12.00,np:[8000,10000,13000,18000,22000],cost:22000},
+  {name:"University of Florida",state:"FL",type:"public",admit:0.23,pell:0.22,par_q1:6.10,np:[4500,6000,9000,13000,19000],cost:22000},
 ];
 
 const FMT = v => v < 0 ? `Aid > cost` : `$${Math.round(v).toLocaleString()}`;
@@ -841,6 +886,50 @@ document.addEventListener('click', e => {
 
 document.getElementById('calcBtn').addEventListener('click', runCalc);
 
+const COL_BY_STATE = {
+  NY: { label: 'New York City area', tier: 'very-high', note: 'NYC is one of the most expensive cities in the US. Budget an extra $3,000–$6,000/yr above published room & board for realistic living costs.' },
+  CA: { label: 'California', tier: 'very-high', note: 'California cities (LA, SF Bay Area, San Diego) have very high housing and food costs. Published room & board often underestimates real costs by $2,000–$5,000/yr.' },
+  MA: { label: 'Boston area', tier: 'high', note: 'Boston is a high cost-of-living city. Off-campus housing especially can run $1,500–$2,500/month. On-campus room & board is more predictable.' },
+  DC: { label: 'Washington D.C.', tier: 'high', note: 'D.C. has high rent and living costs. Expect published room & board to be close to reality on campus, but off-campus will cost significantly more.' },
+  WA: { label: 'Seattle area', tier: 'high', note: 'Seattle has risen sharply in cost of living. Housing in particular is expensive relative to national average.' },
+  IL: { label: 'Chicago area', tier: 'high', note: 'Chicago is moderately expensive — more affordable than NYC or LA, but still above national average, especially for housing near campus.' },
+  PA: { label: 'Pennsylvania', tier: 'medium', note: 'Philadelphia is moderately expensive; Pittsburgh and other PA cities are more affordable. Check the specific campus location.' },
+  TX: { label: 'Texas', tier: 'medium', note: 'Texas cities vary: Austin has risen significantly in cost, while Houston and other cities remain more affordable. Generally below national average.' },
+  GA: { label: 'Georgia / Atlanta', tier: 'medium', note: 'Atlanta and Georgia are moderately affordable compared to coastal cities — below national average for most categories.' },
+  NC: { label: 'North Carolina', tier: 'lower', note: 'North Carolina is generally below national average for cost of living, making your dollar stretch further than coastal schools.' },
+  OH: { label: 'Ohio', tier: 'lower', note: 'Ohio has a below-average cost of living — housing in particular is significantly cheaper than coastal states.' },
+  MI: { label: 'Michigan', tier: 'lower', note: 'Michigan is affordable relative to national average. Ann Arbor is slightly pricier, but still well below coastal cities.' },
+  IN: { label: 'Indiana', tier: 'lower', note: 'Indiana has a low cost of living — one of the more affordable states for students.' },
+  MN: { label: 'Minnesota', tier: 'medium', note: 'Minneapolis has a moderate cost of living — above very cheap Midwest states but well below coastal cities.' },
+  WI: { label: 'Wisconsin', tier: 'lower', note: 'Madison and Wisconsin generally have below-average costs, especially for housing.' },
+  VA: { label: 'Virginia', tier: 'medium', note: 'Northern Virginia near D.C. is expensive; Charlottesville and Blacksburg are more affordable. Check specific school location.' },
+  FL: { label: 'Florida', tier: 'medium', note: 'Florida varies: Miami is expensive; Gainesville, Tallahassee, and Orlando are more affordable. Generally near national average.' },
+  NH: { label: 'New Hampshire', tier: 'medium', note: 'New Hampshire has a moderate cost of living — less expensive than Boston but higher than rural Midwest.' },
+  VT: { label: 'Vermont', tier: 'medium', note: 'Vermont is moderately expensive for a rural state — limited housing stock keeps prices above average.' },
+  CT: { label: 'Connecticut', tier: 'high', note: 'Connecticut near NYC or New Haven is expensive. Cost of living is above national average.' },
+  NJ: { label: 'New Jersey', tier: 'high', note: 'New Jersey has a high cost of living due to proximity to NYC. Housing especially runs well above average.' },
+  MD: { label: 'Maryland', tier: 'high', note: 'Maryland near D.C. is expensive. College Park is more moderate but still above national average.' },
+  RI: { label: 'Rhode Island', tier: 'high', note: 'Providence is moderately expensive; housing costs have risen. Above national average overall.' },
+  SC: { label: 'South Carolina', tier: 'lower', note: 'South Carolina is generally affordable with below-average living costs.' },
+  AL: { label: 'Alabama', tier: 'lower', note: 'Alabama has one of the lowest costs of living in the US — housing especially is inexpensive.' },
+  TN: { label: 'Tennessee', tier: 'lower', note: 'Tennessee is affordable overall; Nashville has risen in cost but Knoxville and other cities remain cheap.' },
+  LA: { label: 'Louisiana', tier: 'lower', note: 'Louisiana has a low cost of living overall — housing is inexpensive compared to national average.' },
+  AR: { label: 'Arkansas', tier: 'lower', note: 'Arkansas has one of the lowest costs of living in the country.' },
+  MS: { label: 'Mississippi', tier: 'lower', note: 'Mississippi is consistently one of the most affordable states.' },
+  KS: { label: 'Kansas', tier: 'lower', note: 'Kansas has a low cost of living, especially for housing.' },
+  MO: { label: 'Missouri', tier: 'lower', note: 'Missouri is affordable — Kansas City and St. Louis are below national average.' },
+  NE: { label: 'Nebraska', tier: 'lower', note: 'Nebraska has below-average living costs.' },
+  IA: { label: 'Iowa', tier: 'lower', note: 'Iowa is consistently one of the most affordable states for students.' },
+  OK: { label: 'Oklahoma', tier: 'lower', note: 'Oklahoma has a low cost of living — housing is very affordable.' },
+  CO: { label: 'Colorado', tier: 'high', note: 'Colorado, especially Denver and Boulder, has seen a sharp rise in costs. Housing is now significantly above national average.' },
+  AZ: { label: 'Arizona', tier: 'medium', note: 'Arizona is moderately affordable — Phoenix and Tucson are below coastal averages but have risen in recent years.' },
+  DE: { label: 'Delaware', tier: 'medium', note: 'Delaware is moderately priced — less expensive than neighboring Maryland and New Jersey.' },
+  ME: { label: 'Maine', tier: 'medium', note: 'Maine is moderately affordable; Brunswick is a small college town with reasonable costs.' },
+};
+
+const COL_TIER_COLORS = { 'very-high': '#e07060', 'high': '#d4a853', 'medium': '#8cb4d8', 'lower': '#7bc89a' };
+const COL_TIER_LABELS = { 'very-high': 'Very High Cost City', 'high': 'High Cost Area', 'medium': 'Moderate Cost', 'lower': 'Affordable Area' };
+
 function runCalc() {
   if (calcSchoolIdx === null) { calcInput.focus(); calcInput.style.borderColor='#e07060'; return; }
   calcInput.style.borderColor = '';
@@ -850,26 +939,63 @@ function runCalc() {
   const savings = Math.max(0, +document.getElementById('calcSavings').value || 0);
   const years = Math.max(1, Math.min(6, +document.getElementById('calcYears').value || 4));
   const income = INCOME_MIDPOINTS[bracketIdx];
-
-  const netPrice = r.np[bracketIdx];
-  const totalCost = netPrice * years;
   const savingsPerYear = savings / years;
-  const annualAffordable = savingsPerYear + income * 0.22; // rough EFC-style: ~22% of income
-  const annualGap = Math.max(0, netPrice - annualAffordable);
-  const totalGap = annualGap * years;
+
+  // Sticker costs
+  const sticker = r.cost; // total cost of attendance
+  const estRoomBoard = Math.min(Math.round(sticker * 0.22), 18000); // ~18-22% of COA is R&B
+  const estTuition = sticker - estRoomBoard;
+  const col = COL_BY_STATE[r.state] || { label: r.state, tier: 'medium', note: 'Cost of living data not available for this state.' };
+
+  // Phase 1: Raw gap (savings only — income isn't guaranteed to go to college)
+  const rawGap = Math.max(0, sticker - savingsPerYear);
+
+  // Phase 2: After school's typical need-based aid (from our data)
+  const netPrice = Math.max(0, r.np[bracketIdx]);
+  const aidGap = Math.max(0, netPrice - savingsPerYear);
+
+  // Pell (only relevant AFTER school aid, as extra layer)
   const pellEligible = bracketIdx <= 1;
   const pellAmt = bracketIdx === 0 ? PELL_MAX : bracketIdx === 1 ? Math.round(PELL_MAX * 0.6) : 0;
-  const netGap = Math.max(0, annualGap - pellAmt);
+  const finalGap = Math.max(0, aidGap - pellAmt);
 
-  // Result cards
-  const grid = document.getElementById('resultGrid');
-  grid.innerHTML = [
-    { label: 'Est. Net Price / Year', value: netPrice < 0 ? 'Aid > Cost' : '$'+netPrice.toLocaleString(), sub: `After grants at ${INCOME_LABELS[bracketIdx]}`, cls: netPrice < 5000 ? 'good' : netPrice > 40000 ? 'danger' : '' },
-    { label: 'Total Over ' + years + ' Years', value: '$'+Math.max(0,totalCost).toLocaleString(), sub: 'Net price × years', cls: '' },
-    { label: 'Est. Annual Budget', value: '$'+Math.round(annualAffordable).toLocaleString(), sub: 'Income contribution + savings drawdown', cls: '' },
-    { label: 'Annual Funding Gap', value: annualGap === 0 ? 'None!' : '$'+Math.round(annualGap).toLocaleString(), sub: pellEligible ? `Before Pell Grant (~$${pellAmt.toLocaleString()}/yr)` : 'Gap to cover via aid/loans/work', cls: annualGap === 0 ? 'good' : annualGap > 20000 ? 'danger' : 'highlight' },
-    { label: 'Pell Grant (est.)', value: pellEligible ? '$'+pellAmt.toLocaleString()+'/yr' : 'Likely $0', sub: pellEligible ? 'Free — no repayment' : 'Income above Pell threshold', cls: pellEligible ? 'good' : '' },
-    { label: 'Gap After Pell', value: netGap === 0 ? 'Covered!' : '$'+Math.round(netGap).toLocaleString()+'/yr', sub: 'Still need via scholarships/loans', cls: netGap === 0 ? 'good' : netGap > 15000 ? 'danger' : 'highlight' },
+  // ── Phase 1: Sticker Reality ──
+  document.getElementById('phase1Title').textContent = 'Step 1 — The Sticker Price (Before Any Aid)';
+  const stickerGrid = document.getElementById('stickerGrid');
+  stickerGrid.innerHTML = [
+    { label: 'Full Cost of Attendance', value: '$'+sticker.toLocaleString()+'/yr', sub: 'Tuition + fees + room & board (published rate)', cls: 'danger' },
+    { label: 'Est. Tuition & Fees', value: '$'+estTuition.toLocaleString()+'/yr', sub: 'Approx. — varies by program', cls: '' },
+    { label: 'Est. Room & Board', value: '$'+estRoomBoard.toLocaleString()+'/yr', sub: 'On-campus estimate', cls: '' },
+    { label: 'Total Over '+years+' Years', value: '$'+(sticker*years).toLocaleString(), sub: 'No aid, no scholarships', cls: 'danger' },
+    { label: 'Your Savings / Year', value: '$'+Math.round(savingsPerYear).toLocaleString()+'/yr', sub: '$'+savings.toLocaleString()+' ÷ '+years+' years', cls: savingsPerYear >= sticker ? 'good' : '' },
+    { label: 'Sticker Gap / Year', value: rawGap === 0 ? 'Covered' : '$'+Math.round(rawGap).toLocaleString()+'/yr', sub: 'Before income, aid, or loans', cls: rawGap === 0 ? 'good' : rawGap > 40000 ? 'danger' : 'highlight' },
+  ].map(c => `
+    <div class="result-card ${c.cls}">
+      <div class="result-label">${c.label}</div>
+      <div class="result-value ${c.cls === 'good' ? 'green' : c.cls === 'danger' ? 'red' : 'gold'}">${c.value}</div>
+      <div class="result-sub">${c.sub}</div>
+    </div>`).join('');
+
+  // Cost of living note
+  stickerGrid.innerHTML += `
+    <div class="result-card" style="grid-column:1/-1;background:rgba(255,255,255,0.04);">
+      <div class="result-label" style="display:flex;align-items:center;gap:8px;">
+        Location: ${col.label}
+        <span style="font-size:0.68rem;padding:2px 8px;border-radius:10px;background:${COL_TIER_COLORS[col.tier]}22;color:${COL_TIER_COLORS[col.tier]};border:1px solid ${COL_TIER_COLORS[col.tier]}44;font-weight:600;">${COL_TIER_LABELS[col.tier]}</span>
+      </div>
+      <div class="result-sub" style="font-size:0.8rem;margin-top:6px;color:rgba(245,240,232,0.65);line-height:1.55;">${col.note}</div>
+    </div>`;
+
+  // ── Phase 2: After school aid ──
+  document.getElementById('phase2Title').textContent = 'Step 2 — After ' + r.name + "'s Typical Need-Based Aid";
+  const aidResultGrid = document.getElementById('aidResultGrid');
+  aidResultGrid.innerHTML = [
+    { label: 'Net Price for '+INCOME_LABELS[bracketIdx], value: r.np[bracketIdx] <= 0 ? 'Aid > Cost' : '$'+netPrice.toLocaleString()+'/yr', sub: 'Average charged after institutional grants (College Scorecard data)', cls: netPrice < 5000 ? 'good' : netPrice > 40000 ? 'danger' : '' },
+    { label: 'School Aid Saves You', value: '$'+(sticker - netPrice < 0 ? 0 : sticker - netPrice).toLocaleString()+'/yr', sub: 'Difference from sticker to net price', cls: (sticker - netPrice) > 20000 ? 'good' : '' },
+    { label: 'Gap After School Aid', value: aidGap === 0 ? 'Covered!' : '$'+Math.round(aidGap).toLocaleString()+'/yr', sub: 'Net price minus your savings', cls: aidGap === 0 ? 'good' : aidGap > 25000 ? 'danger' : 'highlight' },
+    { label: 'Pell Grant (if eligible)', value: pellEligible ? '$'+pellAmt.toLocaleString()+'/yr' : 'Likely $0', sub: pellEligible ? 'Federal — free, no repayment. File FAFSA.' : 'Income bracket above Pell threshold (~$60k)', cls: pellEligible ? 'good' : '' },
+    { label: 'Remaining Gap', value: finalGap === 0 ? 'Covered!' : '$'+Math.round(finalGap).toLocaleString()+'/yr', sub: 'Still needed via scholarships, work, or loans', cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : 'highlight' },
+    { label: 'Total Remaining Over '+years+' Yrs', value: finalGap === 0 ? '$0' : '$'+(Math.round(finalGap)*years).toLocaleString(), sub: 'What scholarships + loans need to cover', cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : '' },
   ].map(c => `
     <div class="result-card ${c.cls}">
       <div class="result-label">${c.label}</div>
@@ -879,21 +1005,23 @@ function runCalc() {
 
   // Verdict
   const verdict = document.getElementById('gapVerdict');
-  if (netGap === 0 || annualGap === 0) {
+  if (finalGap === 0) {
     verdict.className = 'gap-verdict affordable';
-    verdict.innerHTML = `<strong>✓ Looks affordable.</strong> Based on your income and savings, ${r.name}'s net price appears manageable — especially with Pell Grant support. Still file FAFSA early and look for scholarships to build a cushion.`;
-  } else if (netGap < 10000) {
+    verdict.innerHTML = `<strong>✓ Potentially manageable</strong> — after ${r.name}'s typical need-based aid and Pell Grant (if eligible), your savings may cover the rest. <em>Important:</em> Aid packages aren't guaranteed — actual aid depends on your full financial picture, FAFSA results, and the school's budget. File FAFSA early and use ${r.name}'s net price calculator for a personalized estimate.`;
+  } else if (finalGap <= 10000) {
     verdict.className = 'gap-verdict stretch';
-    verdict.innerHTML = `<strong>⚠ Stretch — but closeable.</strong> There's roughly <strong>$${Math.round(netGap).toLocaleString()}/yr</strong> left to cover after income, savings, and Pell Grant. One or two scholarships (see below) could close this gap. Also consider appealing your financial aid package.`;
+    verdict.innerHTML = `<strong>⚠ Stretch — roughly $${Math.round(finalGap).toLocaleString()}/yr still needed</strong> after savings, school aid, and Pell. This is a realistic target for scholarships and part-time work (federal work-study averages $2,000–$2,500/yr). You'd likely also need some subsidized loans. See the resources below.`;
+  } else if (finalGap <= 25000) {
+    verdict.className = 'gap-verdict difficult';
+    verdict.innerHTML = `<strong>⚠ Difficult — $${Math.round(finalGap).toLocaleString()}/yr gap</strong> remaining after all typical aid. This is a significant burden. You would need substantial scholarships, loans, and/or work-study to attend. Consider whether lower-cost alternatives (in-state public schools, schools with stronger aid) might be a better financial fit — or aggressively pursue the scholarships listed below.`;
   } else {
     verdict.className = 'gap-verdict difficult';
-    verdict.innerHTML = `<strong>⚠ Significant gap: ~$${Math.round(netGap).toLocaleString()}/yr</strong> left to cover after income, savings, and Pell. This doesn't mean ${r.name} is out of reach — but you'll need to stack scholarships, work-study, and possibly subsidized loans. The resources below are your best starting points. Also look at whether ${r.name}'s financial aid office will negotiate.`;
+    verdict.innerHTML = `<strong>⚠ Very large gap: $${Math.round(finalGap).toLocaleString()}/yr</strong> — this would likely require significant loans that could follow you for years after graduation. Before committing, compare with lower-cost options and use ${r.name}'s official net price calculator, which gives a more personalized estimate. Also: appeal your aid package after acceptance — many schools increase awards.`;
   }
 
   // Aid resources
-  document.getElementById('aidTitle').textContent = 'Scholarships, Grants & Guides to Help Close the Gap';
+  document.getElementById('aidTitle').textContent = 'Step 3 — Financial Aid Options & How to Apply';
   const aidGrid = document.getElementById('aidGrid');
-  // Sort: put federal first, then scholarships relevant to income level, then guides
   const sorted = [...AID_RESOURCES].sort((a, b) => {
     const order = { federal: 0, grant: 1, scholarship: 2, guide: 3 };
     return order[a.tag] - order[b.tag];
