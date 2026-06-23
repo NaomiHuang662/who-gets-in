@@ -759,10 +759,24 @@ document.getElementById('searchBox').addEventListener('input', e => {
   searchQuery = e.target.value.trim();
   buildScatter();
 
-  // Auto-select if exactly one match
-  if (searchQuery.length > 2) {
+  if (searchQuery.length > 1) {
     const matches = DATA.filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (matches.length === 1) selectSchool(DATA.indexOf(matches[0]));
+    if (matches.length === 1) {
+      selectSchool(DATA.indexOf(matches[0]));
+    }
+    // Zoom scatter to show matching dots
+    if (matches.length >= 1 && matches.length <= 10) {
+      const xs = matches.map(r => r.admit * 100);
+      const ys = matches.map(r => r.par_q1);
+      const padX = Math.max(5, (Math.max(...xs) - Math.min(...xs)) * 0.5);
+      const padY = Math.max(2, (Math.max(...ys) - Math.min(...ys)) * 0.5);
+      scatterChart.zoomScale('x', { min: Math.max(0, Math.min(...xs) - padX), max: Math.min(...xs) === Math.max(...xs) ? Math.min(...xs) + 15 : Math.max(...xs) + padX }, 'default');
+      scatterChart.zoomScale('y', { min: Math.max(0, Math.min(...ys) - padY), max: Math.min(...ys) === Math.max(...ys) ? Math.min(...ys) + 8 : Math.max(...ys) + padY }, 'default');
+    } else if (!searchQuery) {
+      scatterChart.resetZoom();
+    }
+  } else {
+    scatterChart.resetZoom();
   }
 });
 
