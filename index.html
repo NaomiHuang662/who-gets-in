@@ -151,6 +151,92 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
 .findings p { font-size: 0.88rem; line-height: 1.7; color: #444; margin-bottom: 10px; }
 .findings p:last-child { margin-bottom: 0; }
 .findings strong { color: #1a1a2e; }
+
+/* ── Affordability Calculator ── */
+.calc-section { background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%); border-radius: 12px; padding: 32px; margin-bottom: 24px; color: #f5f0e8; }
+.calc-section h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+.calc-section h2 em { color: #d4a853; font-style: normal; }
+.calc-section > p { font-size: 0.85rem; color: rgba(245,240,232,0.6); margin-bottom: 28px; }
+.calc-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px; }
+.calc-field label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(245,240,232,0.55); margin-bottom: 7px; }
+.calc-field select, .calc-field input[type=text], .calc-field input[type=number] {
+  width: 100%; padding: 10px 14px; border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08);
+  color: #f5f0e8; font-size: 0.9rem; outline: none;
+}
+.calc-field select option { background: #1a1a2e; }
+.calc-field select:focus, .calc-field input:focus { border-color: #d4a853; }
+.calc-school-wrap { position: relative; }
+.calc-school-wrap input { padding-right: 30px; }
+.calc-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 100;
+  background: #1e1e3a; border: 1px solid rgba(255,255,255,0.15); border-radius: 7px;
+  max-height: 200px; overflow-y: auto; display: none;
+}
+.calc-dropdown.open { display: block; }
+.calc-dropdown-item { padding: 9px 14px; cursor: pointer; font-size: 0.85rem; color: #f5f0e8; }
+.calc-dropdown-item:hover { background: rgba(255,255,255,0.08); }
+.calc-btn {
+  padding: 11px 28px; border-radius: 7px; border: none;
+  background: #d4a853; color: #1a1a2e; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; align-self: flex-end;
+}
+.calc-btn:hover { background: #e0bc6a; }
+
+/* ── Results ── */
+#calcResults { display: none; }
+#calcResults.visible { display: block; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.result-card {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px; padding: 16px 18px;
+}
+.result-card.highlight { background: rgba(212,168,83,0.15); border-color: rgba(212,168,83,0.4); }
+.result-card.danger { background: rgba(200,75,49,0.15); border-color: rgba(200,75,49,0.4); }
+.result-card.good { background: rgba(74,124,89,0.15); border-color: rgba(74,124,89,0.4); }
+.result-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: rgba(245,240,232,0.5); margin-bottom: 6px; }
+.result-value { font-size: 1.4rem; font-weight: 700; color: #f5f0e8; }
+.result-value.gold { color: #d4a853; }
+.result-value.red { color: #e07060; }
+.result-value.green { color: #7bc89a; }
+.result-sub { font-size: 0.72rem; color: rgba(245,240,232,0.45); margin-top: 3px; }
+
+.gap-verdict {
+  border-radius: 9px; padding: 16px 20px; margin-bottom: 22px;
+  font-size: 0.9rem; line-height: 1.6;
+}
+.gap-verdict.affordable { background: rgba(74,124,89,0.2); border: 1px solid rgba(74,124,89,0.4); }
+.gap-verdict.stretch { background: rgba(212,168,83,0.15); border: 1px solid rgba(212,168,83,0.35); }
+.gap-verdict.difficult { background: rgba(200,75,49,0.15); border: 1px solid rgba(200,75,49,0.35); }
+.gap-verdict strong { font-weight: 700; }
+
+/* ── Scholarship list ── */
+.aid-section-title {
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: rgba(245,240,232,0.45); margin: 22px 0 12px; font-weight: 600;
+}
+.aid-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.aid-card {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 14px 16px;
+}
+.aid-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.aid-name { font-size: 0.88rem; font-weight: 600; color: #f5f0e8; }
+.aid-tag {
+  font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0;
+}
+.tag-federal { background: rgba(59,111,182,0.35); color: #8cb4d8; }
+.tag-scholarship { background: rgba(212,168,83,0.3); color: #d4a853; }
+.tag-grant { background: rgba(74,124,89,0.3); color: #7bc89a; }
+.tag-guide { background: rgba(160,100,200,0.3); color: #c8a0e0; }
+.aid-desc { font-size: 0.78rem; color: rgba(245,240,232,0.55); line-height: 1.5; margin-bottom: 8px; }
+.aid-amount { font-size: 0.75rem; color: #d4a853; font-weight: 600; margin-bottom: 6px; }
+.aid-link {
+  font-size: 0.75rem; color: #8cb4d8; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.aid-link:hover { color: #a8ccec; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -250,6 +336,50 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
         <p>The core argument: top universities talk about meritocracy and need-blind aid, but the data shows a consistent pattern where admission selectivity predicts lower low-income enrollment — regardless of financial aid generosity.</p>
       </div>
       <p class="note" style="margin-top:16px;">Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.</p>
+    </div>
+  </div>
+
+  <!-- Affordability Calculator -->
+  <div class="calc-section">
+    <h2>Can You <em>Actually</em> Afford It?</h2>
+    <p>Enter your family's situation to see your real estimated cost, the gap you'd need to cover, and resources to help close it.</p>
+
+    <div class="calc-inputs">
+      <div class="calc-field">
+        <label>Family Income</label>
+        <select id="calcIncome">
+          <option value="0">Under $30,000</option>
+          <option value="1">$30,000 – $48,000</option>
+          <option value="2">$48,000 – $75,000</option>
+          <option value="3">$75,000 – $110,000</option>
+          <option value="4">Over $110,000</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>College Savings (total $)</label>
+        <input type="number" id="calcSavings" placeholder="e.g. 20000" min="0">
+      </div>
+      <div class="calc-field">
+        <label>Years to Pay (1–6)</label>
+        <input type="number" id="calcYears" value="4" min="1" max="6">
+      </div>
+      <div class="calc-field">
+        <label>School</label>
+        <div class="calc-school-wrap">
+          <input type="text" id="calcSchoolInput" placeholder="Type a school name…" autocomplete="off">
+          <div class="calc-dropdown" id="calcDropdown"></div>
+        </div>
+      </div>
+      <div class="calc-field" style="display:flex;align-items:flex-end;">
+        <button class="calc-btn" id="calcBtn">Calculate →</button>
+      </div>
+    </div>
+
+    <div id="calcResults">
+      <div class="result-grid" id="resultGrid"></div>
+      <div class="gap-verdict" id="gapVerdict"></div>
+      <div class="aid-section-title" id="aidTitle"></div>
+      <div class="aid-grid" id="aidGrid"></div>
     </div>
   </div>
 
@@ -635,6 +765,139 @@ document.getElementById('searchBox').addEventListener('input', e => {
     if (matches.length === 1) selectSchool(DATA.indexOf(matches[0]));
   }
 });
+
+// ── Affordability Calculator ───────────────────────────────────────────────
+const INCOME_LABELS = ['Under $30k','$30k–$48k','$48k–$75k','$75k–$110k','Over $110k'];
+const INCOME_MIDPOINTS = [20000, 39000, 61500, 92500, 150000];
+const PELL_MAX = 7395; // 2024–25 max Pell Grant
+
+const AID_RESOURCES = [
+  // Federal
+  { name:'FAFSA', tag:'federal', desc:'Free Application for Federal Student Aid — the single most important form. Unlocks Pell Grants, subsidized loans, and work-study. File as early as Oct 1.', amount:'Opens door to $7,395/yr Pell + loans', url:'https://studentaid.gov/h/apply-for-aid/fafsa' },
+  { name:'Pell Grant', tag:'federal', desc:'Free federal grant for low-to-middle income students. No repayment required. Awarded automatically after FAFSA. Income under ~$60k usually qualifies.', amount:'Up to $7,395/yr (2024–25)', url:'https://studentaid.gov/understand-aid/types/grants/pell' },
+  { name:'Federal Work-Study', tag:'federal', desc:'Part-time jobs on or near campus funded by the government. Money earned goes toward your expenses. Must be listed on your financial aid award letter.', amount:'Varies — avg. $1,800–$2,500/yr', url:'https://studentaid.gov/understand-aid/types/work-study' },
+  { name:'CSS Profile', tag:'federal', desc:'Required by 400+ private colleges for institutional aid. More detailed than FAFSA. File it for every private school — can unlock thousands in extra grants.', amount:'Unlocks institutional grants', url:'https://cssprofile.collegeboard.org' },
+  // Big scholarships
+  { name:'QuestBridge', tag:'scholarship', desc:'Matches high-achieving low-income students with full 4-year scholarships at 50+ top colleges including Princeton, Yale, Stanford. Apply junior or senior year.', amount:'Full ride (tuition + room + board)', url:'https://www.questbridge.org' },
+  { name:'Gates Scholarship', tag:'scholarship', desc:'For exceptional minority students with significant financial need. Covers full cost of attendance beyond other aid. Highly competitive (~300 awarded/yr).', amount:'Full cost of attendance', url:'https://www.thegatesscholarship.org' },
+  { name:'Coca-Cola Scholars', tag:'scholarship', desc:'Merit-based national scholarship. 150 awards per year to high school seniors. GPA, leadership, and community service matter most.', amount:'$20,000', url:'https://www.coca-colascholarsfoundation.org' },
+  { name:'Dell Scholars Program', tag:'scholarship', desc:'For students who overcame significant obstacles. Focus on first-generation, low-income applicants. Includes mentoring and laptop.', amount:'$20,000 + laptop + mentoring', url:'https://www.dellscholars.org' },
+  { name:'Ron Brown Scholar Program', tag:'scholarship', desc:'For African American students with financial need, academic achievement, and leadership. One of the most prestigious HBCU-friendly scholarships.', amount:'$40,000 total ($10k/yr)', url:'https://ronbrown.org' },
+  { name:'Horatio Alger Scholarship', tag:'scholarship', desc:'For students who have faced and overcome adversity. Strong weight on financial need and resilience. Multiple award levels.', amount:'Up to $25,000', url:'https://scholars.horatioalger.org' },
+  { name:'Jack Kent Cooke Foundation', tag:'scholarship', desc:'For high-achieving students with financial need. Covers undergrad and graduate study. One of the largest private scholarships in the US.', amount:'Up to $55,000/yr', url:'https://www.jkcf.org/our-scholarships/college-scholarship-program/' },
+  { name:'Fastweb Scholarship Search', tag:'scholarship', desc:'Free database of 1.5M+ scholarships matched to your profile. Set up an account and check weekly — many local and regional scholarships have low competition.', amount:'Varies', url:'https://www.fastweb.com' },
+  // Grants
+  { name:'State Grant Programs', tag:'grant', desc:'Every state has its own need-based grant. Many require FAFSA. Examples: Cal Grant (CA), TAP (NY), TEXAS Grant (TX). Look up your state's program.', amount:'$500–$15,000/yr depending on state', url:'https://studentaid.gov/understand-aid/types/grants/state' },
+  { name:'Institutional Need-Based Aid', tag:'grant', desc:'Most universities offer their own grants to admitted students with financial need. At elite schools this can cover 100% of demonstrated need. Always appeal your aid package.', amount:'Varies by school — often $20k–$80k/yr', url:'https://studentaid.gov/understand-aid/types/grants' },
+  // Guides
+  { name:'How to Appeal Your Aid Package', tag:'guide', desc:'You can negotiate. Write a professional letter to the financial aid office explaining your circumstances or a competing offer. Many schools increase awards on appeal.', amount:'Potentially $1k–$10k+ more', url:'https://studentaid.gov/complete-aid-process/comparing-aid-offers' },
+  { name:'Net Price Calculators', tag:'guide', desc:'Every college is required to have a net price calculator on their website. Use it before applying to get a personalized estimate of what you'd actually pay.', amount:'Free estimate tool', url:'https://collegecost.ed.gov/net-price' },
+  { name:'College Scorecard', tag:'guide', desc:'Official U.S. Dept of Education database. Compare schools on cost, graduation rates, and post-grad earnings. The data powering this dashboard.', amount:'Free research tool', url:'https://collegescorecard.ed.gov' },
+  { name:'BigFuture Scholarship Search', tag:'guide', desc:'College Board's free scholarship finder. Also includes tools to compare financial aid packages and understand your options.', amount:'Free search', url:'https://bigfuture.collegeboard.org/pay-for-college/scholarship-search' },
+];
+
+let calcSchoolIdx = null;
+
+// School autocomplete
+const calcInput = document.getElementById('calcSchoolInput');
+const calcDropdown = document.getElementById('calcDropdown');
+
+calcInput.addEventListener('input', () => {
+  const q = calcInput.value.toLowerCase().trim();
+  if (!q) { calcDropdown.classList.remove('open'); return; }
+  const matches = DATA.filter(r => r.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { calcDropdown.classList.remove('open'); return; }
+  calcDropdown.innerHTML = matches.map((r, i) =>
+    `<div class="calc-dropdown-item" data-idx="${DATA.indexOf(r)}">${r.name} <span style="opacity:0.4;font-size:0.75rem">${r.state}</span></div>`
+  ).join('');
+  calcDropdown.classList.add('open');
+});
+
+calcDropdown.addEventListener('click', e => {
+  const item = e.target.closest('.calc-dropdown-item');
+  if (!item) return;
+  calcSchoolIdx = +item.dataset.idx;
+  calcInput.value = DATA[calcSchoolIdx].name;
+  calcDropdown.classList.remove('open');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.calc-school-wrap')) calcDropdown.classList.remove('open');
+});
+
+document.getElementById('calcBtn').addEventListener('click', runCalc);
+
+function runCalc() {
+  if (calcSchoolIdx === null) { calcInput.focus(); calcInput.style.borderColor='#e07060'; return; }
+  calcInput.style.borderColor = '';
+
+  const r = DATA[calcSchoolIdx];
+  const bracketIdx = +document.getElementById('calcIncome').value;
+  const savings = Math.max(0, +document.getElementById('calcSavings').value || 0);
+  const years = Math.max(1, Math.min(6, +document.getElementById('calcYears').value || 4));
+  const income = INCOME_MIDPOINTS[bracketIdx];
+
+  const netPrice = r.np[bracketIdx];
+  const totalCost = netPrice * years;
+  const savingsPerYear = savings / years;
+  const annualAffordable = savingsPerYear + income * 0.22; // rough EFC-style: ~22% of income
+  const annualGap = Math.max(0, netPrice - annualAffordable);
+  const totalGap = annualGap * years;
+  const pellEligible = bracketIdx <= 1;
+  const pellAmt = bracketIdx === 0 ? PELL_MAX : bracketIdx === 1 ? Math.round(PELL_MAX * 0.6) : 0;
+  const netGap = Math.max(0, annualGap - pellAmt);
+
+  // Result cards
+  const grid = document.getElementById('resultGrid');
+  grid.innerHTML = [
+    { label: 'Est. Net Price / Year', value: netPrice < 0 ? 'Aid > Cost' : '$'+netPrice.toLocaleString(), sub: `After grants at ${INCOME_LABELS[bracketIdx]}`, cls: netPrice < 5000 ? 'good' : netPrice > 40000 ? 'danger' : '' },
+    { label: 'Total Over ' + years + ' Years', value: '$'+Math.max(0,totalCost).toLocaleString(), sub: 'Net price × years', cls: '' },
+    { label: 'Est. Annual Budget', value: '$'+Math.round(annualAffordable).toLocaleString(), sub: 'Income contribution + savings drawdown', cls: '' },
+    { label: 'Annual Funding Gap', value: annualGap === 0 ? 'None!' : '$'+Math.round(annualGap).toLocaleString(), sub: pellEligible ? `Before Pell Grant (~$${pellAmt.toLocaleString()}/yr)` : 'Gap to cover via aid/loans/work', cls: annualGap === 0 ? 'good' : annualGap > 20000 ? 'danger' : 'highlight' },
+    { label: 'Pell Grant (est.)', value: pellEligible ? '$'+pellAmt.toLocaleString()+'/yr' : 'Likely $0', sub: pellEligible ? 'Free — no repayment' : 'Income above Pell threshold', cls: pellEligible ? 'good' : '' },
+    { label: 'Gap After Pell', value: netGap === 0 ? 'Covered!' : '$'+Math.round(netGap).toLocaleString()+'/yr', sub: 'Still need via scholarships/loans', cls: netGap === 0 ? 'good' : netGap > 15000 ? 'danger' : 'highlight' },
+  ].map(c => `
+    <div class="result-card ${c.cls}">
+      <div class="result-label">${c.label}</div>
+      <div class="result-value ${c.cls === 'good' ? 'green' : c.cls === 'danger' ? 'red' : 'gold'}">${c.value}</div>
+      <div class="result-sub">${c.sub}</div>
+    </div>`).join('');
+
+  // Verdict
+  const verdict = document.getElementById('gapVerdict');
+  if (netGap === 0 || annualGap === 0) {
+    verdict.className = 'gap-verdict affordable';
+    verdict.innerHTML = `<strong>✓ Looks affordable.</strong> Based on your income and savings, ${r.name}'s net price appears manageable — especially with Pell Grant support. Still file FAFSA early and look for scholarships to build a cushion.`;
+  } else if (netGap < 10000) {
+    verdict.className = 'gap-verdict stretch';
+    verdict.innerHTML = `<strong>⚠ Stretch — but closeable.</strong> There's roughly <strong>$${Math.round(netGap).toLocaleString()}/yr</strong> left to cover after income, savings, and Pell Grant. One or two scholarships (see below) could close this gap. Also consider appealing your financial aid package.`;
+  } else {
+    verdict.className = 'gap-verdict difficult';
+    verdict.innerHTML = `<strong>⚠ Significant gap: ~$${Math.round(netGap).toLocaleString()}/yr</strong> left to cover after income, savings, and Pell. This doesn't mean ${r.name} is out of reach — but you'll need to stack scholarships, work-study, and possibly subsidized loans. The resources below are your best starting points. Also look at whether ${r.name}'s financial aid office will negotiate.`;
+  }
+
+  // Aid resources
+  document.getElementById('aidTitle').textContent = 'Scholarships, Grants & Guides to Help Close the Gap';
+  const aidGrid = document.getElementById('aidGrid');
+  // Sort: put federal first, then scholarships relevant to income level, then guides
+  const sorted = [...AID_RESOURCES].sort((a, b) => {
+    const order = { federal: 0, grant: 1, scholarship: 2, guide: 3 };
+    return order[a.tag] - order[b.tag];
+  });
+  aidGrid.innerHTML = sorted.map(a => `
+    <div class="aid-card">
+      <div class="aid-card-top">
+        <div class="aid-name">${a.name}</div>
+        <span class="aid-tag tag-${a.tag}">${a.tag}</span>
+      </div>
+      <div class="aid-amount">${a.amount}</div>
+      <div class="aid-desc">${a.desc}</div>
+      <a class="aid-link" href="${a.url}" target="_blank" rel="noopener">Learn more →</a>
+    </div>`).join('');
+
+  document.getElementById('calcResults').classList.add('visible');
+  document.getElementById('calcResults').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
 // ── School table ───────────────────────────────────────────────────────────
 let tableSortCol = 'admit';
