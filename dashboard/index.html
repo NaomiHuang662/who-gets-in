@@ -237,13 +237,33 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
   display: inline-flex; align-items: center; gap: 4px;
 }
 .aid-link:hover { color: #a8ccec; text-decoration: underline; }
+
+/* ── Language switcher ── */
+.lang-switcher {
+  display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap;
+}
+.lang-btn {
+  padding: 4px 10px; border-radius: 14px;
+  border: 1px solid rgba(245,240,232,0.25);
+  background: transparent; color: rgba(245,240,232,0.55);
+  font-size: 0.78rem; cursor: pointer; transition: all 0.15s;
+  font-family: inherit;
+}
+.lang-btn:hover:not(.active) { border-color: rgba(245,240,232,0.5); color: rgba(245,240,232,0.85); }
+.lang-btn.active { background: rgba(245,240,232,0.15); border-color: rgba(245,240,232,0.6); color: #f5f0e8; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Who Gets In — <em>College Admissions &amp; Family Income</em></h1>
-  <p>Visualizing the gap between "meritocracy" and economic reality across 90+ U.S. universities. Click any dot to explore a school's financial aid breakdown.</p>
+  <h1 id="hdr-title">Who Gets In — <em>College Admissions &amp; Family Income</em></h1>
+  <p id="hdr-subtitle">Visualizing the gap between "meritocracy" and economic reality across 90+ U.S. universities. Click any dot to explore a school's financial aid breakdown.</p>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="applyLang('en')">🇺🇸 EN</button>
+    <button class="lang-btn" onclick="applyLang('es')">🇪🇸 ES</button>
+    <button class="lang-btn" onclick="applyLang('vi')">🇻🇳 VI</button>
+    <button class="lang-btn" onclick="applyLang('zh')">🇨🇳 ZH</button>
+  </div>
 </header>
 
 <div class="container">
@@ -254,21 +274,21 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
       <span class="search-icon">🔍</span>
       <input type="text" id="searchBox" placeholder="Search for a school…">
     </div>
-    <span class="ctrl-label">Highlight:</span>
-    <button class="pill-btn active" data-filter="all">All schools</button>
-    <button class="pill-btn" data-filter="selective">Most selective (&lt;15%)</button>
-    <button class="pill-btn" data-filter="public">Public universities</button>
-    <button class="pill-btn" data-filter="private">Private universities</button>
+    <span class="ctrl-label" id="ctrl-label">Highlight:</span>
+    <button class="pill-btn active" data-filter="all" id="filter-all">All schools</button>
+    <button class="pill-btn" data-filter="selective" id="filter-selective">Most selective (&lt;15%)</button>
+    <button class="pill-btn" data-filter="public" id="filter-public">Public universities</button>
+    <button class="pill-btn" data-filter="private" id="filter-private">Private universities</button>
   </div>
 
   <!-- Selected school banner -->
   <div id="selectedBanner">
     <span class="sel-name" id="selName">—</span>
     <div class="sel-stats">
-      <div class="sel-stat"><div class="sv" id="selAdmit">—</div><div class="sl">Admit Rate</div></div>
-      <div class="sel-stat"><div class="sv" id="selQ1">—</div><div class="sl">Bottom Quintile</div></div>
-      <div class="sel-stat"><div class="sv" id="selPell">—</div><div class="sl">Pell Grant Rate</div></div>
-      <div class="sel-stat"><div class="sv" id="selCost">—</div><div class="sl">Cost of Attendance</div></div>
+      <div class="sel-stat"><div class="sv" id="selAdmit">—</div><div class="sl" id="sl-admit">Admit Rate</div></div>
+      <div class="sel-stat"><div class="sv" id="selQ1">—</div><div class="sl" id="sl-q1">Bottom Quintile</div></div>
+      <div class="sel-stat"><div class="sv" id="selPell">—</div><div class="sl" id="sl-pell">Pell Grant Rate</div></div>
+      <div class="sel-stat"><div class="sv" id="selCost">—</div><div class="sl" id="sl-cost">Cost of Attendance</div></div>
     </div>
     <button class="clear-btn" id="clearBtn">✕ Clear</button>
   </div>
@@ -277,9 +297,9 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
   <div class="two-col">
     <!-- Chart 1 -->
     <div class="card">
-      <div class="card-title">Admission Rate vs. Low-Income Enrollment</div>
-      <div class="card-desc">Each dot is a university. X = how selective (lower = harder to get in). Y = % of students from the bottom income quintile. <strong>The pattern: the most elite schools enroll the fewest low-income students.</strong></div>
-      <div class="click-hint">👆 Click any dot to see that school's financial aid breakdown →</div>
+      <div class="card-title" id="chart1-title">Admission Rate vs. Low-Income Enrollment</div>
+      <div class="card-desc" id="chart1-desc">Each dot is a university. X = how selective (lower = harder to get in). Y = % of students from the bottom income quintile. <strong>The pattern: the most elite schools enroll the fewest low-income students.</strong></div>
+      <div class="click-hint" id="click-hint">👆 Click any dot to see that school's financial aid breakdown →</div>
       <div class="zoom-controls">
         <button class="zoom-btn active-mode" id="modeZoom">🔍 Draw box to zoom</button>
         <button class="zoom-btn" id="modePan">✋ Pan</button>
@@ -287,13 +307,13 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
         <span class="zoom-hint" id="zoomHint">Drag to draw a zoom box</span>
       </div>
       <div class="legend">
-        <div class="leg"><div class="leg-dot" style="background:#c84b31"></div>&lt;10% admit</div>
-        <div class="leg"><div class="leg-dot" style="background:#d4a853"></div>10–25%</div>
-        <div class="leg"><div class="leg-dot" style="background:#4a7c59"></div>25–50%</div>
-        <div class="leg"><div class="leg-dot" style="background:#8cb4d8"></div>&gt;50%</div>
+        <div class="leg"><div class="leg-dot" style="background:#c84b31"></div><span id="leg1">&lt;10% admit</span></div>
+        <div class="leg"><div class="leg-dot" style="background:#d4a853"></div><span id="leg2">10–25%</span></div>
+        <div class="leg"><div class="leg-dot" style="background:#4a7c59"></div><span id="leg3">25–50%</span></div>
+        <div class="leg"><div class="leg-dot" style="background:#8cb4d8"></div><span id="leg4">&gt;50%</span></div>
       </div>
       <canvas id="scatterChart"></canvas>
-      <p class="note">Source: Opportunity Insights Mobility Report Cards (~2013–2017 cohorts). Hover for details. Click to select.</p>
+      <p class="note" id="chart1-note">Source: Opportunity Insights Mobility Report Cards (~2013–2017 cohorts). Hover for details. Click to select.</p>
     </div>
 
     <!-- Chart 2 -->
@@ -301,7 +321,7 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
       <div class="card-title" id="barTitle">What Families Actually Pay — <span style="color:#3b6fb6">select a school</span></div>
       <div class="card-desc" id="barDesc">Click any dot on the scatter plot, or search for a school above, to see what families at each income level actually pay after grants and scholarships.</div>
       <canvas id="barChart"></canvas>
-      <p class="note">Source: U.S. Dept. of Education College Scorecard (most recent year). Negative values = net aid exceeds costs.</p>
+      <p class="note" id="chart2-note">Source: U.S. Dept. of Education College Scorecard (most recent year). Negative values = net aid exceeds costs.</p>
     </div>
   </div>
 
@@ -309,44 +329,44 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
   <div class="two-col">
     <!-- Gap table -->
     <div class="card">
-      <div class="card-title">The Meritocracy Gap — Ranked</div>
-      <div class="card-desc">Schools where the gap between admission selectivity and low-income enrollment is largest. High admit rate but low low-income share = the gap is especially stark.</div>
+      <div class="card-title" id="gap-title">The Meritocracy Gap — Ranked</div>
+      <div class="card-desc" id="gap-desc">Schools where the gap between admission selectivity and low-income enrollment is largest. High admit rate but low low-income share = the gap is especially stark.</div>
       <table class="gap-table" id="gapTable">
         <thead>
           <tr>
-            <th>#</th>
-            <th>School</th>
-            <th>Admit</th>
-            <th>Bottom Quintile</th>
-            <th>Gap Score</th>
+            <th id="gth-rank">#</th>
+            <th id="gth-school">School</th>
+            <th id="gth-admit">Admit</th>
+            <th id="gth-bq">Bottom Quintile</th>
+            <th id="gth-gap">Gap Score</th>
           </tr>
         </thead>
         <tbody id="gapBody"></tbody>
       </table>
-      <p class="note">Gap score = (1 − admission rate) × (1 − bottom quintile share) — schools scoring highest are both selective AND enroll few low-income students. Click any row to select that school.</p>
+      <p class="note" id="gap-note">Gap score = (1 − admission rate) × (1 − bottom quintile share) — schools scoring highest are both selective AND enroll few low-income students. Click any row to select that school.</p>
     </div>
 
     <!-- Findings -->
     <div class="card">
-      <div class="card-title">What the Data Shows</div>
+      <div class="card-title" id="findings-title">What the Data Shows</div>
       <div class="findings">
         <p>Across 90+ universities, <strong>admission selectivity and low-income enrollment move in opposite directions</strong>. Schools admitting fewer than 10% of applicants enroll just 2–5% of students from the bottom income quintile — while schools admitting 60–90% enroll 8–15%.</p>
         <p>The financial aid picture is more nuanced. Many highly selective private universities charge families earning under $30k almost nothing: <strong>Princeton charges $41/year, MIT and Stanford near zero</strong>. That looks like radical generosity — but these schools admit so few low-income applicants that the policy barely moves enrollment numbers.</p>
         <p>Meanwhile, less selective public universities like UC Riverside (76% admit rate) and UC Irvine (29%) enroll far more low-income students as a raw share of enrollment. <strong>In practice, access comes more from open admissions than from need-blind aid at elite schools.</strong></p>
         <p>The core argument: top universities talk about meritocracy and need-blind aid, but the data shows a consistent pattern where admission selectivity predicts lower low-income enrollment — regardless of financial aid generosity.</p>
       </div>
-      <p class="note" style="margin-top:16px;">Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.</p>
+      <p class="note" id="findings-note" style="margin-top:16px;">Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.</p>
     </div>
   </div>
 
   <!-- Affordability Calculator -->
   <div class="calc-section">
-    <h2>Can You <em>Actually</em> Afford It?</h2>
-    <p>Enter your family's situation to see your real estimated cost, the gap you'd need to cover, and resources to help close it.</p>
+    <h2 id="calc-h2">Can You <em>Actually</em> Afford It?</h2>
+    <p id="calc-p">Enter your family's situation to see your real estimated cost, the gap you'd need to cover, and resources to help close it.</p>
 
     <div class="calc-inputs">
       <div class="calc-field">
-        <label>Family Income</label>
+        <label id="lbl-income">Family Income</label>
         <select id="calcIncome">
           <option value="0">Under $30,000</option>
           <option value="1">$30,000 – $48,000</option>
@@ -356,15 +376,15 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
         </select>
       </div>
       <div class="calc-field">
-        <label>College Savings (total $)</label>
+        <label id="lbl-savings">College Savings (total $)</label>
         <input type="number" id="calcSavings" placeholder="e.g. 20000" min="0">
       </div>
       <div class="calc-field">
-        <label>Years to Pay (1–6)</label>
+        <label id="lbl-years">Years to Pay (1–6)</label>
         <input type="number" id="calcYears" value="4" min="1" max="6">
       </div>
       <div class="calc-field">
-        <label>School</label>
+        <label id="lbl-school">School</label>
         <div class="calc-school-wrap">
           <input type="text" id="calcSchoolInput" placeholder="Type a school name…" autocomplete="off">
           <div class="calc-dropdown" id="calcDropdown"></div>
@@ -393,19 +413,19 @@ header p { color: rgba(245,240,232,0.6); font-size: 0.9rem; max-width: 600px; }
 
   <!-- Full school table -->
   <div class="card">
-    <div class="card-title">All Schools — Browse &amp; Click to Select</div>
-    <div class="card-desc">Click any row to load that school's financial aid chart. Click column headers to sort.</div>
+    <div class="card-title" id="table-title">All Schools — Browse &amp; Click to Select</div>
+    <div class="card-desc" id="table-desc">Click any row to load that school's financial aid chart. Click column headers to sort.</div>
     <div class="table-wrap">
       <table class="school-table" id="schoolTable">
         <thead>
           <tr>
-            <th data-col="name">School <span class="sort-arrow">↕</span></th>
-            <th data-col="type">Type <span class="sort-arrow">↕</span></th>
-            <th data-col="admit">Admit Rate <span class="sort-arrow">↕</span></th>
-            <th data-col="par_q1">Bottom Quintile % <span class="sort-arrow">↕</span></th>
-            <th data-col="pell">Pell Grant Rate <span class="sort-arrow">↕</span></th>
-            <th data-col="cost">Cost of Attendance <span class="sort-arrow">↕</span></th>
-            <th data-col="np0">Net Price &lt;$30k <span class="sort-arrow">↕</span></th>
+            <th data-col="name" id="th-name">School <span class="sort-arrow">↕</span></th>
+            <th data-col="type" id="th-type">Type <span class="sort-arrow">↕</span></th>
+            <th data-col="admit" id="th-admit">Admit Rate <span class="sort-arrow">↕</span></th>
+            <th data-col="par_q1" id="th-bq">Bottom Quintile % <span class="sort-arrow">↕</span></th>
+            <th data-col="pell" id="th-pell">Pell Grant Rate <span class="sort-arrow">↕</span></th>
+            <th data-col="cost" id="th-cost">Cost of Attendance <span class="sort-arrow">↕</span></th>
+            <th data-col="np0" id="th-np0">Net Price &lt;$30k <span class="sort-arrow">↕</span></th>
           </tr>
         </thead>
         <tbody id="schoolTableBody"></tbody>
@@ -628,12 +648,12 @@ function setChartMode(mode) {
   if (mode === 'zoom') {
     document.getElementById('modeZoom').classList.add('active-mode');
     document.getElementById('modePan').classList.remove('active-mode');
-    document.getElementById('zoomHint').textContent = 'Drag to draw a zoom box';
+    document.getElementById('zoomHint').textContent = T('chart1.hintZoom');
     scatterCtx.style.cursor = 'crosshair';
   } else {
     document.getElementById('modePan').classList.add('active-mode');
     document.getElementById('modeZoom').classList.remove('active-mode');
-    document.getElementById('zoomHint').textContent = 'Drag to pan · click a dot to select';
+    document.getElementById('zoomHint').textContent = T('chart1.hintPan');
     scatterCtx.style.cursor = 'grab';
   }
 }
@@ -753,8 +773,8 @@ function selectSchool(idx) {
 function clearSelection() {
   selectedIdx = null;
   document.getElementById('selectedBanner').classList.remove('visible');
-  document.getElementById('barTitle').innerHTML = `What Families Actually Pay — <span style="color:#3b6fb6">select a school</span>`;
-  document.getElementById('barDesc').textContent = 'Click any dot on the scatter plot, or search for a school above, to see what families at each income level actually pay after grants and scholarships.';
+  document.getElementById('barTitle').innerHTML = T('chart2.title0');
+  document.getElementById('barDesc').textContent = T('chart2.desc0');
   barChart.data.datasets[0].data = [0,0,0,0,0];
   barChart.update();
   buildScatter();
@@ -960,15 +980,15 @@ function runCalc() {
   const finalGap = Math.max(0, aidGap - pellAmt);
 
   // ── Phase 1: Sticker Reality ──
-  document.getElementById('phase1Title').textContent = 'Step 1 — The Sticker Price (Before Any Aid)';
+  document.getElementById('phase1Title').textContent = T('step1');
   const stickerGrid = document.getElementById('stickerGrid');
   stickerGrid.innerHTML = [
-    { label: 'Full Cost of Attendance', value: '$'+sticker.toLocaleString()+'/yr', sub: 'Tuition + fees + room & board (published rate)', cls: 'danger' },
-    { label: 'Est. Tuition & Fees', value: '$'+estTuition.toLocaleString()+'/yr', sub: 'Approx. — varies by program', cls: '' },
-    { label: 'Est. Room & Board', value: '$'+estRoomBoard.toLocaleString()+'/yr', sub: 'On-campus estimate', cls: '' },
-    { label: 'Total Over '+years+' Years', value: '$'+(sticker*years).toLocaleString(), sub: 'No aid, no scholarships', cls: 'danger' },
-    { label: 'Your Savings / Year', value: '$'+Math.round(savingsPerYear).toLocaleString()+'/yr', sub: '$'+savings.toLocaleString()+' ÷ '+years+' years', cls: savingsPerYear >= sticker ? 'good' : '' },
-    { label: 'Sticker Gap / Year', value: rawGap === 0 ? 'Covered' : '$'+Math.round(rawGap).toLocaleString()+'/yr', sub: 'Before income, aid, or loans', cls: rawGap === 0 ? 'good' : rawGap > 40000 ? 'danger' : 'highlight' },
+    { label: T('r.fullCost'), value: '$'+sticker.toLocaleString()+'/yr', sub: T('r.fullCost.sub'), cls: 'danger' },
+    { label: T('r.tuition'), value: '$'+estTuition.toLocaleString()+'/yr', sub: T('r.tuition.sub'), cls: '' },
+    { label: T('r.roomboard'), value: '$'+estRoomBoard.toLocaleString()+'/yr', sub: T('r.roomboard.sub'), cls: '' },
+    { label: T('r.totalOver').replace('{n}', years), value: '$'+(sticker*years).toLocaleString(), sub: T('r.totalOver.sub'), cls: 'danger' },
+    { label: T('r.savings'), value: '$'+Math.round(savingsPerYear).toLocaleString()+'/yr', sub: T('r.savings.sub').replace('${s}', savings.toLocaleString()).replace('{n}', years), cls: savingsPerYear >= sticker ? 'good' : '' },
+    { label: T('r.stickerGap'), value: rawGap === 0 ? T('r.covered') : '$'+Math.round(rawGap).toLocaleString()+'/yr', sub: T('r.stickerGap.sub'), cls: rawGap === 0 ? 'good' : rawGap > 40000 ? 'danger' : 'highlight' },
   ].map(c => `
     <div class="result-card ${c.cls}">
       <div class="result-label">${c.label}</div>
@@ -987,15 +1007,15 @@ function runCalc() {
     </div>`;
 
   // ── Phase 2: After school aid ──
-  document.getElementById('phase2Title').textContent = 'Step 2 — After ' + r.name + "'s Typical Need-Based Aid";
+  document.getElementById('phase2Title').textContent = T('step2').replace('{school}', r.name);
   const aidResultGrid = document.getElementById('aidResultGrid');
   aidResultGrid.innerHTML = [
-    { label: 'Net Price for '+INCOME_LABELS[bracketIdx], value: r.np[bracketIdx] <= 0 ? 'Aid > Cost' : '$'+netPrice.toLocaleString()+'/yr', sub: 'Average charged after institutional grants (College Scorecard data)', cls: netPrice < 5000 ? 'good' : netPrice > 40000 ? 'danger' : '' },
-    { label: 'School Aid Saves You', value: '$'+(sticker - netPrice < 0 ? 0 : sticker - netPrice).toLocaleString()+'/yr', sub: 'Difference from sticker to net price', cls: (sticker - netPrice) > 20000 ? 'good' : '' },
-    { label: 'Gap After School Aid', value: aidGap === 0 ? 'Covered!' : '$'+Math.round(aidGap).toLocaleString()+'/yr', sub: 'Net price minus your savings', cls: aidGap === 0 ? 'good' : aidGap > 25000 ? 'danger' : 'highlight' },
-    { label: 'Pell Grant (if eligible)', value: pellEligible ? '$'+pellAmt.toLocaleString()+'/yr' : 'Likely $0', sub: pellEligible ? 'Federal — free, no repayment. File FAFSA.' : 'Income bracket above Pell threshold (~$60k)', cls: pellEligible ? 'good' : '' },
-    { label: 'Remaining Gap', value: finalGap === 0 ? 'Covered!' : '$'+Math.round(finalGap).toLocaleString()+'/yr', sub: 'Still needed via scholarships, work, or loans', cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : 'highlight' },
-    { label: 'Total Remaining Over '+years+' Yrs', value: finalGap === 0 ? '$0' : '$'+(Math.round(finalGap)*years).toLocaleString(), sub: 'What scholarships + loans need to cover', cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : '' },
+    { label: T('r.netPrice').replace('{bracket}', INCOME_LABELS[bracketIdx]), value: r.np[bracketIdx] <= 0 ? T('r.aidExceed') : '$'+netPrice.toLocaleString()+'/yr', sub: T('r.netPrice.sub'), cls: netPrice < 5000 ? 'good' : netPrice > 40000 ? 'danger' : '' },
+    { label: T('r.aidSaves'), value: '$'+(sticker - netPrice < 0 ? 0 : sticker - netPrice).toLocaleString()+'/yr', sub: T('r.aidSaves.sub'), cls: (sticker - netPrice) > 20000 ? 'good' : '' },
+    { label: T('r.gapAfterAid'), value: aidGap === 0 ? T('r.covered2') : '$'+Math.round(aidGap).toLocaleString()+'/yr', sub: T('r.gapAfterAid.sub'), cls: aidGap === 0 ? 'good' : aidGap > 25000 ? 'danger' : 'highlight' },
+    { label: T('r.pell'), value: pellEligible ? '$'+pellAmt.toLocaleString()+'/yr' : 'Likely $0', sub: pellEligible ? T('r.pell.eligible') : T('r.pell.ineligible'), cls: pellEligible ? 'good' : '' },
+    { label: T('r.remaining'), value: finalGap === 0 ? T('r.covered2') : '$'+Math.round(finalGap).toLocaleString()+'/yr', sub: T('r.remaining.sub'), cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : 'highlight' },
+    { label: T('r.totalRemaining').replace('{n}', years), value: finalGap === 0 ? '$0' : '$'+(Math.round(finalGap)*years).toLocaleString(), sub: T('r.totalRemaining.sub'), cls: finalGap === 0 ? 'good' : finalGap > 15000 ? 'danger' : '' },
   ].map(c => `
     <div class="result-card ${c.cls}">
       <div class="result-label">${c.label}</div>
@@ -1007,20 +1027,20 @@ function runCalc() {
   const verdict = document.getElementById('gapVerdict');
   if (finalGap === 0) {
     verdict.className = 'gap-verdict affordable';
-    verdict.innerHTML = `<strong>✓ Potentially manageable</strong> — after ${r.name}'s typical need-based aid and Pell Grant (if eligible), your savings may cover the rest. <em>Important:</em> Aid packages aren't guaranteed — actual aid depends on your full financial picture, FAFSA results, and the school's budget. File FAFSA early and use ${r.name}'s net price calculator for a personalized estimate.`;
+    verdict.innerHTML = T('verdict.manageable').replace(/\{school\}/g, r.name);
   } else if (finalGap <= 10000) {
     verdict.className = 'gap-verdict stretch';
-    verdict.innerHTML = `<strong>⚠ Stretch — roughly $${Math.round(finalGap).toLocaleString()}/yr still needed</strong> after savings, school aid, and Pell. This is a realistic target for scholarships and part-time work (federal work-study averages $2,000–$2,500/yr). You'd likely also need some subsidized loans. See the resources below.`;
+    verdict.innerHTML = T('verdict.stretch').replace('${gap}', Math.round(finalGap).toLocaleString());
   } else if (finalGap <= 25000) {
     verdict.className = 'gap-verdict difficult';
-    verdict.innerHTML = `<strong>⚠ Difficult — $${Math.round(finalGap).toLocaleString()}/yr gap</strong> remaining after all typical aid. This is a significant burden. You would need substantial scholarships, loans, and/or work-study to attend. Consider whether lower-cost alternatives (in-state public schools, schools with stronger aid) might be a better financial fit — or aggressively pursue the scholarships listed below.`;
+    verdict.innerHTML = T('verdict.difficult').replace('${gap}', Math.round(finalGap).toLocaleString());
   } else {
     verdict.className = 'gap-verdict difficult';
-    verdict.innerHTML = `<strong>⚠ Very large gap: $${Math.round(finalGap).toLocaleString()}/yr</strong> — this would likely require significant loans that could follow you for years after graduation. Before committing, compare with lower-cost options and use ${r.name}'s official net price calculator, which gives a more personalized estimate. Also: appeal your aid package after acceptance — many schools increase awards.`;
+    verdict.innerHTML = T('verdict.veryDifficult').replace('${gap}', Math.round(finalGap).toLocaleString()).replace(/\{school\}/g, r.name);
   }
 
   // Aid resources
-  document.getElementById('aidTitle').textContent = 'Step 3 — Financial Aid Options & How to Apply';
+  document.getElementById('aidTitle').textContent = T('step3');
   const aidGrid = document.getElementById('aidGrid');
   const sorted = [...AID_RESOURCES].sort((a, b) => {
     const order = { federal: 0, grant: 1, scholarship: 2, guide: 3 };
@@ -1059,7 +1079,7 @@ function buildSchoolTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${r.name}</strong></td>
-      <td><span class="type-badge ${r.type === 'public' ? 'type-pub' : 'type-priv'}">${r.type}</span></td>
+      <td><span class="type-badge ${r.type === 'public' ? 'type-pub' : 'type-priv'}">${T('type.' + r.type)}</span></td>
       <td>${PCT(r.admit)}</td>
       <td>${r.par_q1.toFixed(1)}%</td>
       <td>${PCT(r.pell)}</td>
@@ -1086,6 +1106,512 @@ document.querySelectorAll('.school-table th[data-col]').forEach(th => {
     buildSchoolTable();
   });
 });
+
+
+// ── i18n ───────────────────────────────────────────────────────────────────
+let currentLang = 'en';
+
+const LANGS = {
+  en: {
+    'hdr.title': 'Who Gets In — <em>College Admissions &amp; Family Income</em>',
+    'hdr.sub': 'Visualizing the gap between “meritocracy” and economic reality across 90+ U.S. universities. Click any dot to explore a school’s financial aid breakdown.',
+    'ctrl.highlight': 'Highlight:',
+    'filter.all': 'All schools',
+    'filter.selective': 'Most selective (<15%)',
+    'filter.public': 'Public universities',
+    'filter.private': 'Private universities',
+    'banner.admit': 'Admit Rate',
+    'banner.q1': 'Bottom Quintile',
+    'banner.pell': 'Pell Grant Rate',
+    'banner.cost': 'Cost of Attendance',
+    'banner.clear': '✕ Clear',
+    'chart1.title': 'Admission Rate vs. Low-Income Enrollment',
+    'chart1.desc': 'Each dot is a university. X = how selective (lower = harder to get in). Y = % of students from the bottom income quintile. <strong>The pattern: the most elite schools enroll the fewest low-income students.</strong>',
+    'chart1.hint': '👆 Click any dot to see that school’s financial aid breakdown →',
+    'chart1.zoom': '🔍 Draw box to zoom',
+    'chart1.pan': '✋ Pan',
+    'chart1.reset': '↺ Reset',
+    'chart1.hintZoom': 'Drag to draw a zoom box',
+    'chart1.hintPan': 'Drag to pan · click a dot to select',
+    'chart1.leg1': '<10% admit',
+    'chart1.leg2': '10–25%',
+    'chart1.leg3': '25–50%',
+    'chart1.leg4': '>50%',
+    'chart1.note': 'Source: Opportunity Insights Mobility Report Cards (~2013–2017 cohorts). Hover for details. Click to select.',
+    'chart2.title0': 'What Families Actually Pay — <span style="color:#3b6fb6">select a school</span>',
+    'chart2.desc0': 'Click any dot on the scatter plot, or search for a school above, to see what families at each income level actually pay after grants and scholarships.',
+    'chart2.note': 'Source: U.S. Dept. of Education College Scorecard (most recent year). Negative values = net aid exceeds costs.',
+    'gap.title': 'The Meritocracy Gap — Ranked',
+    'gap.desc': 'Schools where the gap between admission selectivity and low-income enrollment is largest. High admit rate but low low-income share = the gap is especially stark.',
+    'gap.th.rank': '#',
+    'gap.th.school': 'School',
+    'gap.th.admit': 'Admit',
+    'gap.th.bq': 'Bottom Quintile',
+    'gap.th.gap': 'Gap Score',
+    'gap.note': 'Gap score = (1 − admission rate) × (1 − bottom quintile share) — schools scoring highest are both selective AND enroll few low-income students. Click any row to select that school.',
+    'findings.title': 'What the Data Shows',
+    'findings.note': 'Data: College Scorecard (U.S. Dept. of Education) + Opportunity Insights Mobility Report Cards. Income quintile shares reflect ~2013–2017 cohorts.',
+    'calc.h2': 'Can You <em>Actually</em> Afford It?',
+    'calc.p': 'Enter your family’s situation to see your real estimated cost, the gap you’d need to cover, and resources to help close it.',
+    'calc.income': 'Family Income',
+    'calc.savings': 'College Savings (total $)',
+    'calc.years': 'Years to Pay (1–6)',
+    'calc.school': 'School',
+    'calc.schoolPlaceholder': 'Type a school name…',
+    'calc.search': 'Search for a school…',
+    'calc.btn': 'Calculate →',
+    'income.0': 'Under $30,000',
+    'income.1': '$30,000 – $48,000',
+    'income.2': '$48,000 – $75,000',
+    'income.3': '$75,000 – $110,000',
+    'income.4': 'Over $110,000',
+    'table.title': 'All Schools — Browse &amp; Click to Select',
+    'table.desc': 'Click any row to load that school’s financial aid chart. Click column headers to sort.',
+    'th.school': 'School',
+    'th.type': 'Type',
+    'th.admit': 'Admit Rate',
+    'th.bq': 'Bottom Quintile %',
+    'th.pell': 'Pell Grant Rate',
+    'th.cost': 'Cost of Attendance',
+    'th.np0': 'Net Price <$30k',
+    'type.public': 'public',
+    'type.private': 'private',
+    'step1': 'Step 1 — The Sticker Price (Before Any Aid)',
+    'step2': "Step 2 — After {school}'s Typical Need-Based Aid",
+    'step3': 'Step 3 — Financial Aid Options & How to Apply',
+    'r.fullCost': 'Full Cost of Attendance',
+    'r.fullCost.sub': 'Tuition + fees + room & board (published rate)',
+    'r.tuition': 'Est. Tuition & Fees',
+    'r.tuition.sub': 'Approx. — varies by program',
+    'r.roomboard': 'Est. Room & Board',
+    'r.roomboard.sub': 'On-campus estimate',
+    'r.totalOver': 'Total Over {n} Years',
+    'r.totalOver.sub': 'No aid, no scholarships',
+    'r.savings': 'Your Savings / Year',
+    'r.savings.sub': '${s} ÷ {n} years',
+    'r.stickerGap': 'Sticker Gap / Year',
+    'r.stickerGap.sub': 'Before income, aid, or loans',
+    'r.netPrice': 'Net Price for {bracket}',
+    'r.netPrice.sub': 'Average charged after institutional grants (College Scorecard data)',
+    'r.aidSaves': 'School Aid Saves You',
+    'r.aidSaves.sub': 'Difference from sticker to net price',
+    'r.gapAfterAid': 'Gap After School Aid',
+    'r.gapAfterAid.sub': 'Net price minus your savings',
+    'r.pell': 'Pell Grant (if eligible)',
+    'r.pell.eligible': 'Federal — free, no repayment. File FAFSA.',
+    'r.pell.ineligible': 'Income bracket above Pell threshold (~$60k)',
+    'r.remaining': 'Remaining Gap',
+    'r.remaining.sub': 'Still needed via scholarships, work, or loans',
+    'r.totalRemaining': 'Total Remaining Over {n} Yrs',
+    'r.totalRemaining.sub': 'What scholarships + loans need to cover',
+    'r.covered': 'Covered',
+    'r.covered2': 'Covered!',
+    'r.aidExceed': 'Aid > cost',
+    'verdict.manageable': '<strong>✓ Potentially manageable</strong> — after {school}’s typical need-based aid and Pell Grant (if eligible), your savings may cover the rest. <em>Important:</em> Aid packages aren’t guaranteed — actual aid depends on your full financial picture, FAFSA results, and the school’s budget. File FAFSA early and use {school}’s net price calculator for a personalized estimate.',
+    'verdict.stretch': '<strong>⚠ Stretch — roughly ${gap}/yr still needed</strong> after savings, school aid, and Pell. This is a realistic target for scholarships and part-time work (federal work-study averages $2,000–$2,500/yr). You’d likely also need some subsidized loans. See the resources below.',
+    'verdict.difficult': '<strong>⚠ Difficult — ${gap}/yr gap</strong> remaining after all typical aid. This is a significant burden. You would need substantial scholarships, loans, and/or work-study to attend. Consider whether lower-cost alternatives (in-state public schools, schools with stronger aid) might be a better financial fit — or aggressively pursue the scholarships listed below.',
+    'verdict.veryDifficult': '<strong>⚠ Very large gap: ${gap}/yr</strong> — this would likely require significant loans that could follow you for years after graduation. Before committing, compare with lower-cost options and use {school}’s official net price calculator, which gives a more personalized estimate. Also: appeal your aid package after acceptance — many schools increase awards.',
+  },
+  es: {
+    'hdr.title': 'Quién Entra — <em>Admisiones Universitarias e Ingresos Familiares</em>',
+    'hdr.sub': 'Visualizando la brecha entre la “meritocracia” y la realidad económica en más de 90 universidades de EE. UU. Haz clic en cualquier punto para explorar el desglose de ayuda financiera de una escuela.',
+    'ctrl.highlight': 'Filtrar:',
+    'filter.all': 'Todas las escuelas',
+    'filter.selective': 'Más selectivas (<15%)',
+    'filter.public': 'Universidades públicas',
+    'filter.private': 'Universidades privadas',
+    'banner.admit': 'Tasa de admisión',
+    'banner.q1': 'Quintil inferior',
+    'banner.pell': 'Tasa de Beca Pell',
+    'banner.cost': 'Costo de asistencia',
+    'banner.clear': '✕ Limpiar',
+    'chart1.title': 'Tasa de admisión vs. Inscripción de bajos ingresos',
+    'chart1.desc': 'Cada punto es una universidad. X = selectividad (menor = más difícil entrar). Y = % de estudiantes del quintil inferior de ingresos. <strong>El patrón: las escuelas más élites inscriben menos estudiantes de bajos ingresos.</strong>',
+    'chart1.hint': '👆 Haz clic en cualquier punto para ver el desglose de ayuda financiera →',
+    'chart1.zoom': '🔍 Dibujar cuadro de zoom',
+    'chart1.pan': '✋ Mover',
+    'chart1.reset': '↺ Restablecer',
+    'chart1.hintZoom': 'Arrastra para dibujar un cuadro de zoom',
+    'chart1.hintPan': 'Arrastra para mover · haz clic en un punto para seleccionar',
+    'chart1.leg1': '<10% admisión',
+    'chart1.leg2': '10–25%',
+    'chart1.leg3': '25–50%',
+    'chart1.leg4': '>50%',
+    'chart1.note': 'Fuente: Opportunity Insights Mobility Report Cards (~cohortes 2013–2017). Pasa el cursor para ver detalles. Haz clic para seleccionar.',
+    'chart2.title0': 'Lo que las familias realmente pagan — <span style="color:#3b6fb6">selecciona una escuela</span>',
+    'chart2.desc0': 'Haz clic en cualquier punto o busca una escuela arriba para ver lo que las familias pagan en cada nivel de ingresos después de becas y subvenciones.',
+    'chart2.note': 'Fuente: College Scorecard del Dept. de Educación de EE. UU. Valores negativos = la ayuda supera los costos.',
+    'gap.title': 'La Brecha de Meritocracia — Clasificada',
+    'gap.desc': 'Escuelas donde la brecha entre selectividad y inscripción de bajos ingresos es mayor. Alta tasa de admisión pero baja participación de bajos ingresos = la brecha es especialmente pronunciada.',
+    'gap.th.rank': '#',
+    'gap.th.school': 'Escuela',
+    'gap.th.admit': 'Admisión',
+    'gap.th.bq': 'Quintil inferior',
+    'gap.th.gap': 'Puntaje de brecha',
+    'gap.note': 'Puntaje de brecha = (1 − tasa de admisión) × (1 − participación del quintil inferior). Las escuelas con mayor puntaje son selectivas Y con poca presencia de bajos ingresos. Haz clic en cualquier fila para seleccionar.',
+    'findings.title': 'Lo que muestran los datos',
+    'findings.note': 'Datos: College Scorecard (Dept. de Educación de EE. UU.) + Opportunity Insights Mobility Report Cards. Las participaciones por quintil de ingresos reflejan cohortes ~2013–2017.',
+    'calc.h2': '¿Puedes <em>realmente</em> pagarlo?',
+    'calc.p': 'Ingresa la situación de tu familia para ver el costo real estimado, la brecha que necesitas cubrir y los recursos para cerrarla.',
+    'calc.income': 'Ingresos familiares',
+    'calc.savings': 'Ahorros universitarios (total $)',
+    'calc.years': 'Años para pagar (1–6)',
+    'calc.school': 'Escuela',
+    'calc.schoolPlaceholder': 'Escribe el nombre de una escuela…',
+    'calc.search': 'Buscar una escuela…',
+    'calc.btn': 'Calcular →',
+    'income.0': 'Menos de $30,000',
+    'income.1': '$30,000 – $48,000',
+    'income.2': '$48,000 – $75,000',
+    'income.3': '$75,000 – $110,000',
+    'income.4': 'Más de $110,000',
+    'table.title': 'Todas las escuelas — Explorar y hacer clic para seleccionar',
+    'table.desc': 'Haz clic en cualquier fila para ver el gráfico de ayuda financiera. Haz clic en los encabezados para ordenar.',
+    'th.school': 'Escuela',
+    'th.type': 'Tipo',
+    'th.admit': 'Tasa de admisión',
+    'th.bq': 'Quintil inferior %',
+    'th.pell': 'Tasa de Beca Pell',
+    'th.cost': 'Costo de asistencia',
+    'th.np0': 'Precio neto <$30k',
+    'type.public': 'público',
+    'type.private': 'privado',
+    'step1': 'Paso 1 — El precio de lista (antes de cualquier ayuda)',
+    'step2': 'Paso 2 — Después de la ayuda económica de {school}',
+    'step3': 'Paso 3 — Opciones de ayuda financiera y cómo solicitarla',
+    'r.fullCost': 'Costo total de asistencia',
+    'r.fullCost.sub': 'Matrícula + cuotas + alojamiento y comida (precio publicado)',
+    'r.tuition': 'Matrícula y cuotas estimadas',
+    'r.tuition.sub': 'Aprox. — varía por programa',
+    'r.roomboard': 'Alojamiento y comida estimados',
+    'r.roomboard.sub': 'Estimación en campus',
+    'r.totalOver': 'Total en {n} años',
+    'r.totalOver.sub': 'Sin ayuda ni becas',
+    'r.savings': 'Tus ahorros / año',
+    'r.savings.sub': '${s} ÷ {n} años',
+    'r.stickerGap': 'Brecha del precio de lista / año',
+    'r.stickerGap.sub': 'Antes de ingresos, ayuda o préstamos',
+    'r.netPrice': 'Precio neto para {bracket}',
+    'r.netPrice.sub': 'Promedio cobrado después de subvenciones institucionales',
+    'r.aidSaves': 'La escuela te ahorra',
+    'r.aidSaves.sub': 'Diferencia entre precio de lista y precio neto',
+    'r.gapAfterAid': 'Brecha después de ayuda',
+    'r.gapAfterAid.sub': 'Precio neto menos tus ahorros',
+    'r.pell': 'Beca Pell (si aplica)',
+    'r.pell.eligible': 'Federal — gratis, sin reembolso. Presenta FAFSA.',
+    'r.pell.ineligible': 'Nivel de ingresos por encima del umbral de Pell (~$60k)',
+    'r.remaining': 'Brecha restante',
+    'r.remaining.sub': 'Aún necesario mediante becas, trabajo o préstamos',
+    'r.totalRemaining': 'Total restante en {n} años',
+    'r.totalRemaining.sub': 'Lo que becas + préstamos deben cubrir',
+    'r.covered': 'Cubierto',
+    'r.covered2': '¡Cubierto!',
+    'r.aidExceed': 'Ayuda > costo',
+    'verdict.manageable': '<strong>✓ Potencialmente manejable</strong> — después de la ayuda típica de {school} y la Beca Pell (si aplica), tus ahorros podrían cubrir el resto. <em>Importante:</em> Los paquetes de ayuda no son garantizados. Presenta FAFSA temprano y usa la calculadora de precio neto de {school}.',
+    'verdict.stretch': '<strong>⚠ Esfuerzo — aproximadamente ${gap}/año aún necesario</strong> después de ahorros, ayuda escolar y Pell. Es un objetivo realista para becas y trabajo de medio tiempo. Probablemente también necesitarás algunos préstamos subsidiados.',
+    'verdict.difficult': '<strong>⚠ Difícil — brecha de ${gap}/año</strong> después de toda la ayuda típica. Considera si alternativas de menor costo (escuelas públicas dentro del estado) podrían ser mejor opción económica.',
+    'verdict.veryDifficult': '<strong>⚠ Brecha muy grande: ${gap}/año</strong> — esto probablemente requerirá préstamos significativos. Antes de comprometerte, compara con opciones de menor costo y usa la calculadora oficial de precio neto de {school}.',
+  },
+  vi: {
+    'hdr.title': 'Ai Được Nhận — <em>Tuyển Sinh Đại Học &amp; Thu Nhập Gia Đình</em>',
+    'hdr.sub': 'Minh họa khoảng cách giữa “chế độ nhân tài” và thực tế kinh tế tại hơn 90 trường đại học Mỹ. Nhấp vào bất kỳ điểm nào để khám phá bảng phân tích hỗ trợ tài chính của trường.',
+    'ctrl.highlight': 'Lọc:',
+    'filter.all': 'Tất cả các trường',
+    'filter.selective': 'Chọn lọc nhất (<15%)',
+    'filter.public': 'Đại học công lập',
+    'filter.private': 'Đại học tư thục',
+    'banner.admit': 'Tỷ lệ tuyển sinh',
+    'banner.q1': 'Ngũ phân vị thấp nhất',
+    'banner.pell': 'Tỷ lệ Học bổng Pell',
+    'banner.cost': 'Chi phí học tập',
+    'banner.clear': '✕ Xóa',
+    'chart1.title': 'Tỷ lệ tuyển sinh vs. Sinh viên thu nhập thấp',
+    'chart1.desc': 'Mỗi điểm là một trường đại học. X = mức độ chọn lọc (thấp hơn = khó vào hơn). Y = % sinh viên từ ngũ phân vị thu nhập thấp nhất. <strong>Xu hướng: các trường danh tiếng nhất tuyển ít sinh viên thu nhập thấp nhất.</strong>',
+    'chart1.hint': '👆 Nhấp vào bất kỳ điểm nào để xem phân tích hỗ trợ tài chính →',
+    'chart1.zoom': '🔍 Vẽ khung để phóng to',
+    'chart1.pan': '✋ Di chuyển',
+    'chart1.reset': '↺ Đặt lại',
+    'chart1.hintZoom': 'Kéo để vẽ khung phóng to',
+    'chart1.hintPan': 'Kéo để di chuyển · nhấp vào điểm để chọn',
+    'chart1.leg1': '<10% tuyển sinh',
+    'chart1.leg2': '10–25%',
+    'chart1.leg3': '25–50%',
+    'chart1.leg4': '>50%',
+    'chart1.note': 'Nguồn: Opportunity Insights Mobility Report Cards (~2013–2017). Di chuột để xem chi tiết. Nhấp để chọn.',
+    'chart2.title0': 'Gia đình thực sự trả bao nhiêu — <span style="color:#3b6fb6">chọn một trường</span>',
+    'chart2.desc0': 'Nhấp vào bất kỳ điểm nào hoặc tìm kiếm trường ở trên để xem các gia đình ở mỗi mức thu nhập thực sự trả bao nhiêu sau học bổng.',
+    'chart2.note': 'Nguồn: College Scorecard của Bộ Giáo dục Mỹ. Giá trị âm = hỗ trợ vượt chi phí.',
+    'gap.title': 'Khoảng Cách Nhân Tài — Xếp hạng',
+    'gap.desc': 'Các trường có khoảng cách lớn nhất giữa tính chọn lọc và tỷ lệ sinh viên thu nhập thấp.',
+    'gap.th.rank': '#',
+    'gap.th.school': 'Trường',
+    'gap.th.admit': 'Tuyển sinh',
+    'gap.th.bq': 'Ngũ phân vị thấp',
+    'gap.th.gap': 'Điểm khoảng cách',
+    'gap.note': 'Điểm khoảng cách = (1 − tỷ lệ tuyển sinh) × (1 − tỷ lệ ngũ phân vị thấp). Nhấp vào hàng để chọn trường.',
+    'findings.title': 'Dữ liệu cho thấy gì',
+    'findings.note': 'Dữ liệu: College Scorecard (Bộ Giáo dục Mỹ) + Opportunity Insights. Tỷ lệ ngũ phân vị phản ánh các nhóm học sinh ~2013–2017.',
+    'calc.h2': 'Bạn có <em>thực sự</em> đủ khả năng không?',
+    'calc.p': 'Nhập tình huống gia đình của bạn để xem chi phí thực tế ước tính, khoảng cách cần lấp đầy và các nguồn lực hỗ trợ.',
+    'calc.income': 'Thu nhập gia đình',
+    'calc.savings': 'Tiết kiệm đại học (tổng $)',
+    'calc.years': 'Số năm thanh toán (1–6)',
+    'calc.school': 'Trường',
+    'calc.schoolPlaceholder': 'Nhập tên trường…',
+    'calc.search': 'Tìm kiếm trường…',
+    'calc.btn': 'Tính toán →',
+    'income.0': 'Dưới $30,000',
+    'income.1': '$30,000 – $48,000',
+    'income.2': '$48,000 – $75,000',
+    'income.3': '$75,000 – $110,000',
+    'income.4': 'Trên $110,000',
+    'table.title': 'Tất cả các trường — Duyệt &amp; Nhấp để chọn',
+    'table.desc': 'Nhấp vào bất kỳ hàng nào để tải biểu đồ hỗ trợ tài chính. Nhấp vào tiêu đề cột để sắp xếp.',
+    'th.school': 'Trường',
+    'th.type': 'Loại',
+    'th.admit': 'Tỷ lệ tuyển sinh',
+    'th.bq': '% Ngũ phân vị thấp',
+    'th.pell': 'Tỷ lệ Học bổng Pell',
+    'th.cost': 'Chi phí học tập',
+    'th.np0': 'Giá ròng <$30k',
+    'type.public': 'công lập',
+    'type.private': 'tư thục',
+    'step1': 'Bước 1 — Giá niêm yết (trước mọi hỗ trợ)',
+    'step2': 'Bước 2 — Sau hỗ trợ tài chính của {school}',
+    'step3': 'Bước 3 — Các lựa chọn hỗ trợ tài chính',
+    'r.fullCost': 'Tổng chi phí học tập',
+    'r.fullCost.sub': 'Học phí + lệ phí + ký túc xá và ăn uống',
+    'r.tuition': 'Học phí & lệ phí ước tính',
+    'r.tuition.sub': 'Khoảng — tùy theo chương trình',
+    'r.roomboard': 'Ký túc xá & ăn uống ước tính',
+    'r.roomboard.sub': 'Ước tính trong khuôn viên trường',
+    'r.totalOver': 'Tổng trong {n} năm',
+    'r.totalOver.sub': 'Không có hỗ trợ hay học bổng',
+    'r.savings': 'Tiết kiệm của bạn / năm',
+    'r.savings.sub': '${s} ÷ {n} năm',
+    'r.stickerGap': 'Khoảng cách giá niêm yết / năm',
+    'r.stickerGap.sub': 'Trước thu nhập, hỗ trợ hoặc khoản vay',
+    'r.netPrice': 'Giá ròng cho {bracket}',
+    'r.netPrice.sub': 'Trung bình tính sau trợ cấp của trường',
+    'r.aidSaves': 'Trường giúp bạn tiết kiệm',
+    'r.aidSaves.sub': 'Chênh lệch từ giá niêm yết đến giá ròng',
+    'r.gapAfterAid': 'Khoảng cách sau hỗ trợ',
+    'r.gapAfterAid.sub': 'Giá ròng trừ tiết kiệm của bạn',
+    'r.pell': 'Học bổng Pell (nếu đủ điều kiện)',
+    'r.pell.eligible': 'Liên bang — miễn phí, không hoàn trả. Nộp FAFSA.',
+    'r.pell.ineligible': 'Mức thu nhập vượt ngưỡng Pell (~$60k)',
+    'r.remaining': 'Khoảng cách còn lại',
+    'r.remaining.sub': 'Vẫn cần qua học bổng, việc làm hoặc khoản vay',
+    'r.totalRemaining': 'Tổng còn lại trong {n} năm',
+    'r.totalRemaining.sub': 'Phần học bổng + khoản vay cần trang trải',
+    'r.covered': 'Được trang trải',
+    'r.covered2': 'Được trang trải!',
+    'r.aidExceed': 'Hỗ trợ > chi phí',
+    'verdict.manageable': '<strong>✓ Có thể quản lý được</strong> — sau hỗ trợ tài chính của {school} và Học bổng Pell, tiết kiệm của bạn có thể đủ. <em>Lưu ý:</em> Các gói hỗ trợ không được đảm bảo. Nộp FAFSA sớm.',
+    'verdict.stretch': '<strong>⚠ Căng thẳng — còn thiếu khoảng ${gap}/năm</strong> sau tiết kiệm, hỗ trợ trường và Pell. Đây là mục tiêu thực tế cho học bổng và làm việc bán thời gian.',
+    'verdict.difficult': '<strong>⚠ Khó khăn — thiếu ${gap}/năm</strong> sau tất cả hỗ trợ. Hãy cân nhắc các lựa chọn chi phí thấp hơn.',
+    'verdict.veryDifficult': '<strong>⚠ Khoảng cách rất lớn: ${gap}/năm</strong> — điều này có thể yêu cầu các khoản vay đáng kể. Hãy so sánh với các tùy chọn chi phí thấp hơn trước.',
+  },
+  zh: {
+    'hdr.title': '谁能进入 — <em>大学录取与家庭收入</em>',
+    'hdr.sub': '可视化展示90多所美国大学中"精英主义"与经济现实之间的差距。点击任意圆点查看学校的财务援助详情。',
+    'ctrl.highlight': '筛选:',
+    'filter.all': '所有学校',
+    'filter.selective': '最严格录取(<15%)',
+    'filter.public': '公立大学',
+    'filter.private': '私立大学',
+    'banner.admit': '录取率',
+    'banner.q1': '最低收入五分位',
+    'banner.pell': 'Pell助学金比例',
+    'banner.cost': '学费总费用',
+    'banner.clear': '✕ 清除',
+    'chart1.title': '录取率 vs. 低收入学生入学率',
+    'chart1.desc': '每个点代表一所大学。X = 录取难度（越低越难）。Y = 来自最低收入五分位的学生比例。<strong>规律：最顶尖的学校录取最少低收入学生。</strong>',
+    'chart1.hint': '👆 点击任意圆点查看该校的财务援助详情 →',
+    'chart1.zoom': '🔍 框选缩放',
+    'chart1.pan': '✋ 平移',
+    'chart1.reset': '↺ 重置',
+    'chart1.hintZoom': '拖动绘制缩放框',
+    'chart1.hintPan': '拖动平移 · 点击圆点选择',
+    'chart1.leg1': '<10%录取',
+    'chart1.leg2': '10–25%',
+    'chart1.leg3': '25–50%',
+    'chart1.leg4': '>50%',
+    'chart1.note': '来源：Opportunity Insights流动性报告卡（约2013–2017年）。悬停查看详情。点击选择。',
+    'chart2.title0': '家庭实际支付金额 — <span style="color:#3b6fb6">选择一所学校</span>',
+    'chart2.desc0': '点击散点图上的任意点，或在上方搜索学校，查看各收入水平家庭在助学金后实际支付的费用。',
+    'chart2.note': '来源：美国教育部College Scorecard。负值 = 净援助超过费用。',
+    'gap.title': '精英主义差距 — 排名',
+    'gap.desc': '录取选择性与低收入学生入学率差距最大的学校。高录取率但低收入学生比例低，差距尤为突出。',
+    'gap.th.rank': '#',
+    'gap.th.school': '学校',
+    'gap.th.admit': '录取率',
+    'gap.th.bq': '最低五分位',
+    'gap.th.gap': '差距分数',
+    'gap.note': '差距分数 = (1 − 录取率) × (1 − 最低五分位比例)。点击任意行选择该学校。',
+    'findings.title': '数据揭示了什么',
+    'findings.note': '数据：College Scorecard（美国教育部）+ Opportunity Insights流动性报告卡。收入五分位份额反映约2013–2017年队列。',
+    'calc.h2': '你<em>真的</em>负担得起吗？',
+    'calc.p': '输入家庭情况，查看实际估算费用、需要弥补的差距以及相关资源。',
+    'calc.income': '家庭收入',
+    'calc.savings': '大学储蓄（总额$）',
+    'calc.years': '还款年数（1–6）',
+    'calc.school': '学校',
+    'calc.schoolPlaceholder': '输入学校名称…',
+    'calc.search': '搜索学校…',
+    'calc.btn': '计算 →',
+    'income.0': '低于$30,000',
+    'income.1': '$30,000 – $48,000',
+    'income.2': '$48,000 – $75,000',
+    'income.3': '$75,000 – $110,000',
+    'income.4': '高于$110,000',
+    'table.title': '所有学校 — 浏览&amp;点击选择',
+    'table.desc': '点击任意行查看该校财务援助图表。点击列标题排序。',
+    'th.school': '学校',
+    'th.type': '类型',
+    'th.admit': '录取率',
+    'th.bq': '最低五分位%',
+    'th.pell': 'Pell助学金比例',
+    'th.cost': '学费总费用',
+    'th.np0': '净价格<$30k',
+    'type.public': '公立',
+    'type.private': '私立',
+    'step1': '第1步 — 标价（未含任何援助前）',
+    'step2': '第2步 — {school}典型需求助学金后',
+    'step3': '第3步 — 财务援助选项及申请方式',
+    'r.fullCost': '学费总费用',
+    'r.fullCost.sub': '学费+费用+住宿餐饮（公布价格）',
+    'r.tuition': '学费及各项费用（估算）',
+    'r.tuition.sub': '约 — 因专业而异',
+    'r.roomboard': '住宿餐饮（估算）',
+    'r.roomboard.sub': '校内估算',
+    'r.totalOver': '{n}年总计',
+    'r.totalOver.sub': '无援助、无奖学金',
+    'r.savings': '您的储蓄/年',
+    'r.savings.sub': '${s} ÷ {n}年',
+    'r.stickerGap': '标价差距/年',
+    'r.stickerGap.sub': '未计收入、援助或贷款前',
+    'r.netPrice': '{bracket}的净价格',
+    'r.netPrice.sub': '机构补助金后平均收费（College Scorecard数据）',
+    'r.aidSaves': '学校帮您节省',
+    'r.aidSaves.sub': '标价与净价格之差',
+    'r.gapAfterAid': '援助后剩余差距',
+    'r.gapAfterAid.sub': '净价格减去您的储蓄',
+    'r.pell': 'Pell助学金（如符合资格）',
+    'r.pell.eligible': '联邦 — 免费，无需还款。填写FAFSA。',
+    'r.pell.ineligible': '收入水平高于Pell门槛（约$60k）',
+    'r.remaining': '剩余差距',
+    'r.remaining.sub': '仍需通过奖学金、工作或贷款弥补',
+    'r.totalRemaining': '{n}年剩余总计',
+    'r.totalRemaining.sub': '奖学金+贷款需要覆盖的金额',
+    'r.covered': '已覆盖',
+    'r.covered2': '已覆盖！',
+    'r.aidExceed': '援助>费用',
+    'verdict.manageable': '<strong>✓ 可能可以承受</strong> — 在{school}的典型助学金和Pell助学金（如符合资格）后，您的储蓄可能足够。<em>重要：</em>援助方案不保证。请尽早提交FAFSA。',
+    'verdict.stretch': '<strong>⚠ 勉强够用 — 储蓄、学校援助和Pell后仍需${gap}/年</strong>。这是奖学金和兼职工作的现实目标。',
+    'verdict.difficult': '<strong>⚠ 困难 — ${gap}/年差距</strong>在所有援助后仍存在。请考虑是否低成本替代方案更适合。',
+    'verdict.veryDifficult': '<strong>⚠ 差距很大：${gap}/年</strong> — 这可能需要大量贷款。在承诺前，请比较低成本选项并使用{school}的官方净价格计算器。',
+  },
+};
+
+function T(key) {
+  return (LANGS[currentLang] && LANGS[currentLang][key]) || LANGS.en[key] || key;
+}
+
+function applyLang(lang) {
+  currentLang = lang;
+
+  // Update lang button states
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(lang));
+  });
+
+  // Header
+  document.getElementById('hdr-title').innerHTML = T('hdr.title');
+  document.getElementById('hdr-subtitle').textContent = T('hdr.sub');
+
+  // Controls
+  document.getElementById('ctrl-label').textContent = T('ctrl.highlight');
+  document.getElementById('filter-all').textContent = T('filter.all');
+  document.getElementById('filter-selective').textContent = T('filter.selective');
+  document.getElementById('filter-public').textContent = T('filter.public');
+  document.getElementById('filter-private').textContent = T('filter.private');
+
+  // Search box
+  document.getElementById('searchBox').placeholder = T('calc.search');
+
+  // Banner labels
+  document.getElementById('sl-admit').textContent = T('banner.admit');
+  document.getElementById('sl-q1').textContent = T('banner.q1');
+  document.getElementById('sl-pell').textContent = T('banner.pell');
+  document.getElementById('sl-cost').textContent = T('banner.cost');
+  document.getElementById('clearBtn').textContent = T('banner.clear');
+
+  // Chart 1
+  document.getElementById('chart1-title').textContent = T('chart1.title');
+  document.getElementById('chart1-desc').innerHTML = T('chart1.desc');
+  document.getElementById('click-hint').textContent = T('chart1.hint');
+  document.getElementById('modeZoom').textContent = T('chart1.zoom');
+  document.getElementById('modePan').textContent = T('chart1.pan');
+  document.getElementById('zoomReset').textContent = T('chart1.reset');
+  document.getElementById('zoomHint').textContent = chartMode === 'zoom' ? T('chart1.hintZoom') : T('chart1.hintPan');
+  document.getElementById('leg1').textContent = T('chart1.leg1');
+  document.getElementById('leg2').textContent = T('chart1.leg2');
+  document.getElementById('leg3').textContent = T('chart1.leg3');
+  document.getElementById('leg4').textContent = T('chart1.leg4');
+  document.getElementById('chart1-note').textContent = T('chart1.note');
+
+  // Chart 2 (only update if no school selected)
+  document.getElementById('chart2-note').textContent = T('chart2.note');
+  if (selectedIdx === null) {
+    document.getElementById('barTitle').innerHTML = T('chart2.title0');
+    document.getElementById('barDesc').textContent = T('chart2.desc0');
+  }
+
+  // Gap table
+  document.getElementById('gap-title').textContent = T('gap.title');
+  document.getElementById('gap-desc').textContent = T('gap.desc');
+  document.getElementById('gth-rank').textContent = T('gap.th.rank');
+  document.getElementById('gth-school').textContent = T('gap.th.school');
+  document.getElementById('gth-admit').textContent = T('gap.th.admit');
+  document.getElementById('gth-bq').textContent = T('gap.th.bq');
+  document.getElementById('gth-gap').textContent = T('gap.th.gap');
+  document.getElementById('gap-note').textContent = T('gap.note');
+
+  // Findings
+  document.getElementById('findings-title').textContent = T('findings.title');
+  document.getElementById('findings-note').textContent = T('findings.note');
+
+  // Calc section
+  document.getElementById('calc-h2').innerHTML = T('calc.h2');
+  document.getElementById('calc-p').textContent = T('calc.p');
+  document.getElementById('lbl-income').textContent = T('calc.income');
+  document.getElementById('lbl-savings').textContent = T('calc.savings');
+  document.getElementById('lbl-years').textContent = T('calc.years');
+  document.getElementById('lbl-school').textContent = T('calc.school');
+  document.getElementById('calcSchoolInput').placeholder = T('calc.schoolPlaceholder');
+  document.getElementById('calcBtn').textContent = T('calc.btn');
+
+  // Income select options
+  const sel = document.getElementById('calcIncome');
+  for (let i = 0; i < sel.options.length; i++) sel.options[i].text = T('income.' + i);
+
+  // Full school table headers
+  const sa = ' <span class="sort-arrow">↕</span>';
+  document.getElementById('th-name').innerHTML = T('th.school') + sa;
+  document.getElementById('th-type').innerHTML = T('th.type') + sa;
+  document.getElementById('th-admit').innerHTML = T('th.admit') + sa;
+  document.getElementById('th-bq').innerHTML = T('th.bq') + sa;
+  document.getElementById('th-pell').innerHTML = T('th.pell') + sa;
+  document.getElementById('th-cost').innerHTML = T('th.cost') + sa;
+  document.getElementById('th-np0').innerHTML = T('th.np0') + sa;
+  document.getElementById('table-title').innerHTML = T('table.title');
+  document.getElementById('table-desc').textContent = T('table.desc');
+
+  // Rebuild dynamic tables so type badges use translated strings
+  buildSchoolTable();
+  buildGapTable();
+}
 
 // ── Init ───────────────────────────────────────────────────────────────────
 buildScatter();
